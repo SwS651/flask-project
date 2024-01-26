@@ -1,12 +1,14 @@
 # flask project
 Create environment
-python -m venv venv
+```python -m venv venv```
 
-run virtual environment in command prompt
-venv\Scripts\activate.bat
+#### run virtual environment in command prompt
+```app\venv\Scripts\activate.bat```
 
 <!-- Run Flask -->
-Python -m flask run
+### Run Flask App
+```run.bat```
 
 <!-- Used to automatically run/update after saving -->
-python -m flask --debug run
+### If it prompts that there are missing modules or libraries, please run
+```pip install -r requirement.txt```
