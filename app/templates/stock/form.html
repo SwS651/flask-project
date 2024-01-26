@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% block nav_inventory %}active{% endblock %}
 {% block content %}
   <h2>Create Stock</h2>
   <form method="POST" action="{{ url_for('stock.create_stock') }}">

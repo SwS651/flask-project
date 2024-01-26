@@ -33,11 +33,12 @@
                 <div class="menu-bar">
                     <div class="menu">
                         <ul class="menu-links">
-                            <li class="menu-link active"><i class='nav-icon bx bx-home'></i><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                            <li class="menu-link"><i class='nav-icon bx bxs-package'></i><a href="{{ url_for('stock.index') }}">Inventory</a></li>
-                            <li class="menu-link"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('staff.index') }}">Staff</a></li>
-                            <li class="menu-link"><i class='nav-icon bx bxs-group' ></i><a href="#">Sales Report</a></li>
-                            <li class="menu-link"><i class='nav-icon bx bxs-group' ></i><a href="#">Import</a></li>
+                            <li class="menu-link {% block nav_dashboard %}{% endblock %}"><i class='nav-icon bx bx-home'></i><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                            <li class="menu-link {% block nav_inventory %}{% endblock %}"><i class='nav-icon bx bxs-package'></i><a href="{{ url_for('stock.index') }}">Inventory</a></li>
+                            <li class="menu-link {% block nav_staff %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('staff.index') }}">Staff</a></li>
+                            <li class="menu-link {% block nav_category %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('category.index') }}">Category</a></li>
+                            <li class="menu-link {% block nav_report %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="#">Sales Report</a></li>
+                            <li class="menu-link "><i class='nav-icon bx bxs-group' ></i><a href="#">Import</a></li>
                         </ul>
                     </div>
                     <div class="bottom-content">
