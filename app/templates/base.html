@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-Mart Inventory System</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/responsive.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/cards.css')}}">
+
+    <link rel="stylesheet" href="{{url_for('static',filename='css/preloader.css')}}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+
+
+</head>
+<body>
+
+
+    <div class="wrapper">
+
+        <aside class="opened" id="aside">
+            <div class="sidebar">
+                <div class="brand-items">
+                    <div class="brand-logo">
+                        <img src="{{url_for('static',filename='/img/gear-loader.gif')}}" alt="" class="brand-img">
+                        <h3>Inventory System</h3>
+                    </div>
+                    <div class="mobile menu-burger">
+                        <i class='bx bx-menu '></i>
+                    </div>
+                </div>
+                <div class="menu-bar">
+                    <div class="menu">
+                        <ul class="menu-links">
+                            <li class="menu-link active"><i class='nav-icon bx bx-home'></i><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                            <li class="menu-link"><i class='nav-icon bx bxs-package'></i><a href="{{ url_for('stock.index') }}">Inventory</a></li>
+                            <li class="menu-link"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('staff.index') }}">Staff</a></li>
+                            <li class="menu-link"><i class='nav-icon bx bxs-group' ></i><a href="#">Sales Report</a></li>
+                            <li class="menu-link"><i class='nav-icon bx bxs-group' ></i><a href="#">Import</a></li>
+                        </ul>
+                    </div>
+                    <div class="bottom-content">
+                        
+                        <div>
+                            <i class='nav-icon bx bxs-moon' ></i>
+                            <span>Helloworld</span> 
+                        </div>
+                        <div class="toggle-switch">
+                            <span class="switch"></span>
+                        </div>
+                            
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </aside>
+
+       <div class="main">
+            <header class="main-header">
+                <div class="left-nav">
+                    <div class="menu-burger">
+
+                        <i class='bx bx-menu '></i>
+                    </div>
+                    <p>Dashboard > Inventory</p>
+                </div>
+                
+                <div class="right-nav">
+                    
+                </div>
+            </header>
+            <div class="main-container">
+                    {% block content %} {% endblock %}
+            </div>
+        </div> 
+    </div>
+   
+            
+        <div id="preloader"></div>
+        <script src="{{url_for('static', filename='/js/pre-loader.js')}}"></script>
+        <script>
+            const hamburger = document.querySelectorAll(".menu-burger");
+            const main = document.querySelector(".main");
+            var asside = document.getElementById("aside");
+            var root = document.documentElement;
+    
+            hamburger.forEach((hamburger)=>{
+    
+                hamburger.addEventListener("click",()=>{
+                    
+                    if (asside.classList.contains("opened")) { 
+                        console.log("yes")
+                        asside.classList.remove("opened");
+                        main.classList.toggle("full-page")
+                    }else{
+                        asside.classList.toggle("opened");
+                        
+                        main.classList.remove("full-page")
+                    }
+                    // root.style.setProperty('--sidebar-width', '0%');
+                })
+            })
+    
+            // asside.addEventListener('click',()=>{
+            //     if (! asside.classList.contains("opened")){
+            //         asside.classList.toggle("opened");
+            //         main.classList.remove("full-page")
+            //     }
+            // })
+        </script>
+        <script src="{{url_for('static', filename='/js/dark-mode.js')}}"></script>
+        <script src="DataTables/datatables.min.js">
+                
+            new DataTable('#example');
+        </script>
+        <script>
+            $(document).ready(function () {
+                $('#data').DataTable({
+                    columns: [
+                    null,
+                    {searchable: false},
+                    {orderable: false, searchable: false},
+                    {orderable: false, searchable: false},
+                    null],
+                });
+            });
+        </script>
+    </body>
+    </html>
