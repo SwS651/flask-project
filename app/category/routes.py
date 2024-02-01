@@ -6,7 +6,7 @@ from app import db
 @bp.route('/')
 def index():
     categories = Category.query.all()
-    return render_template('category.html', action="", categories = categories)
+    return render_template('admin/category_management.html', action="", categories = categories)
 
 
 @bp.route('/create', methods=['GET','POST'])
@@ -22,12 +22,12 @@ def create_category():
      
     if request.method == 'GET':
         categories = Category.query.all()
-        return render_template('category.html',categories = categories,action = 'create_category',category = False)
+        return render_template('admin/category_management.html',categories = categories,action = 'create_category',category = False)
     
 
-@bp.route('/<int:category_id>/edit', methods=['GET', 'POST'])
-def edit_category(category_id):
-    category = Category.query.get_or_404(category_id)
+@bp.route('/<category_name>/edit', methods=['POST'])
+def edit_category(category_name):
+    category = db.one_or_404(db.select(Category).filter_by(category_name=category_name))
 
     if request.method == 'POST':
         # Update data from the form
@@ -36,9 +36,8 @@ def edit_category(category_id):
         
         # Commit changes to the database
         db.session.commit()
-        return redirect(url_for('category.index'))
-    categories = Category.query.all()
-    return render_template('category.html',action = 'edit_category',categories = categories, category = category)
+
+    return redirect(url_for('category.index'))
 
 @bp.route('/<int:category_id>/delete', methods=['POST'])
 def delete_category(category_id):

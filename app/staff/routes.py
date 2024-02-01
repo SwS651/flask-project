@@ -48,12 +48,13 @@ def edit_staff(id):
     
     return redirect(url_for('staff.index'))
 
-@bp.route('/<int:id>/delete', methods=['POST'])
+@bp.route('/<string:id>/delete', methods=['POST'])
 def delete_staff(id):
-    report = Staff.query.get_or_404(id)
+    staff = db.one_or_404(db.select(Staff).filter_by(StaffID=id))
+    # staff = Staff.query.get_or_404(id)
 
     # Delete the inventory item from the database
-    db.session.delete(report)
+    db.session.delete(staff)
     db.session.commit()
 
     return redirect(url_for('staff.index'))

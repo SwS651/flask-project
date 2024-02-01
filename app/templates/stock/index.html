@@ -2,17 +2,16 @@
 {% block nav_inventory %}active{% endblock %}
 {% block content %}
 
-    <span class="title"><h1>{% block title %} The Inventory Page {% endblock %}</h1></span>
-    <div class="content">
-        <h2>This is the Stock Flask blueprint</h2>
-    </div>
-    <form action="{{url_for('stock.search_stock')}}" method="get">
-        <label for="search_term">Search: </label>
-        <input type="text" id="search" name="search" {% if search_term  %} value="{{search_term}}" {% endif %} required>
-        <button type="submit">Search</button>
-    </form>
+    <h1 style="text-align: center;">{% block title %} The Inventory Page {% endblock %}</h1>
 
-    <table border="1">
+
+    <a href="{{url_for('stock.create_stock')}}" class="" >Add New</a> <br>
+    <form action="{{url_for('utils.excel_upload',entity = "stock")}}" method="post" enctype = "multipart/form-data" >
+        <input type = "file" name = "file"  />
+        <input type="submit" name="upload_excel" value="IMPORT">
+        <br><br>
+    </form>
+    <table border="1"  style="width: 100%;">
         <thead>
             <tr>
                 {% for colname in column_names if colname not in ['id'] %}
@@ -91,13 +90,13 @@
             btnCancel.addEventListener('click',editable)
         });
 
-        btnDelete.forEach((btnDelete)=>{
-            var row = btnDelete.closest('tr');
-            btnDelete.addEventListener('click',()=>{
+        // btnDelete.forEach((btnDelete)=>{
+        //     var row = btnDelete.closest('tr');
+        //     btnDelete.addEventListener('click',()=>{
 
-                row.remove();
-            })
-        })
+        //         row.remove();
+        //     })
+        // })
 
         // btnUpdate.forEach((btnUpdate)=>{
         //         var form = btnUpdate.closest('form');

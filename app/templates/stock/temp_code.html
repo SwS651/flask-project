@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block nav_inventory %}active{% endblock %}
+{% block content %}
+
+    <h1 style="text-align: center;">{% block title %} The Inventory Page {% endblock %}</h1>
+
+    <a href="{{url_for('stock.create_stock')}}" class="" >Add New</a> <br>
+    <form action="{{url_for('stock.import_stock')}}" method="post">
+        <input type = "file" name = "file"  />
+        <input type="submit" value="IMPORT">
+        <br><br>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                {% for col in column_names %}
+                <th name="" value="{{col}}">
+                    <span>{{col}}</span>
+                    <input type="text" style="display: none;" name="data_header" id="" value="{{col}}" required>
+                </th>
+                {% endfor %}
+                <th>
+                    <a id="edit" href="javascript:;">edit</a>
+                    <a id="update" href="javascript:;" name="" style="display: none;">Update</a>
+                    <a id="cancel" href="javascript:;" style="display: none;">Cancel</a>
+                </th>   
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for index, row in row_data.iterrows() %}
+            <tr >
+                {% for col, row_ in zip(column_names, row) %}
+                <td>
+                    <span name="data-value" value="{{row_}}">{{row_}}</span>
+                    <input type="text" style="display: none;" name="{{col}}" id="" value="{{row_}}" required>
+                </td>
+                {% endfor %}
+                
+                <td>
+                    <a id="edit" href="javascript:;">edit</a>
+                    <a id="update" href="javascript:;" name="" style="display: none;">Update</a>
+                    <a id="cancel" href="javascript:;" style="display: none;">Cancel</a>
+                    <a id="delete" href="javascript:;">delete</a>
+                </td>    
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+
+    <script>
+        var btnEdits = document.querySelectorAll('#edit');
+        var btnCancels = document.querySelectorAll('#cancel');
+        var btnUpdate = document.querySelectorAll('#update');
+        var btnDelete = document.querySelectorAll('#delete');
+
+        btnEdits.forEach((btnEdit)=>{
+            btnEdit.addEventListener('click',editable);
+        });
+        
+        btnCancels.forEach((btnCancel)=>{
+            btnCancel.addEventListener('click',editable)
+        });
+
+        btnUpdate.forEach((btnUpdate)=>{
+            var row = btnUpdate.closest('tr');
+            var inputElements = row.querySelectorAll('input:not([type=radio])');
+
+            btnUpdate.addEventListener('click',()=>{
+                inputElements.forEach((inputElement) => {
+                    var closestSpan = inputElement.parentElement.querySelector('span');
+                    var nearbySpan = inputElement.previousElementSibling; //get sibling element of the input: span
+                    // Update the span text with the input value
+                    if (nearbySpan && inputElement.value) {nearbySpan.textContent = inputElement.value;}
+                });  
+            });
+            btnUpdate.addEventListener('click',editable)
+        })
+
+        btnDelete.forEach((btnDelete)=>{
+            var row = btnDelete.closest('tr');
+            btnDelete.addEventListener('click',()=>{
+
+                row.remove();
+            })
+        })
+
+        
+        function editable(event) {
+            var row = event.target.closest('tr');
+            var inputElements = row.querySelectorAll('input:not([type=radio])');
+            var spanElements = row.querySelectorAll('span');
+
+            inputElements.forEach((inputElement) => {
+                inputElement.style.display = (inputElement.style.display === 'none') ? 'inline-block' : 'none';
+            });
+            spanElements.forEach((spanElement) => {
+                spanElement.style.display = (spanElement.style.display === 'none') ? 'inline-block' : 'none';
+            });
+             // Toggle the display of the edit, update, and cancel links
+            row.querySelector('#edit').style.display = (row.querySelector('#edit').style.display === 'none') ? 'inline-block' : 'none';
+            row.querySelector('#update').style.display = (row.querySelector('#update').style.display === 'none') ? 'inline-block' : 'none';
+            row.querySelector('#cancel').style.display = (row.querySelector('#cancel').style.display === 'none') ? 'inline-block' : 'none';
+            row.querySelector('#delete').style.display = (row.querySelector('#delete').style.display === 'none') ? 'inline-block' : 'none';
+        }
+
+    </script>
+{% endblock %}

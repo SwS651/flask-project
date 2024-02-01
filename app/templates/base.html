@@ -38,7 +38,7 @@
                             <li class="menu-link {% block nav_staff %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('staff.index') }}">Staff</a></li>
                             <li class="menu-link {% block nav_category %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('category.index') }}">Category</a></li>
                             <li class="menu-link {% block nav_report %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="#">Sales Report</a></li>
-                            <li class="menu-link "><i class='nav-icon bx bxs-group' ></i><a href="#">Import</a></li>
+                            <li class="menu-link {% block nav_import %}{% endblock %} "><i class='nav-icon bx bxs-group' ></i><a href="#">Import</a></li>
                         </ul>
                     </div>
                     <div class="bottom-content">

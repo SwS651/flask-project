@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 {% block nav_staff %}active{% endblock %}
 {% block content %}
-<table border="1">
+<a href="{{url_for('staff.create_staff')}}" class="btn" >Add New</a> <br><br>
+<form action="{{url_for('utils.excel_upload',entity = "staff")}}" method="post" enctype = "multipart/form-data" >
+    <input type = "file" name = "file"  />
+    <input type="submit" name="upload_excel" value="IMPORT">
+    <br><br>
+</form>
+<table border="1"  style="width: 100%;">
     <thead>
         <tr>
             {% for colname in column_names if colname not in ['id','Password'] %}
@@ -37,14 +43,14 @@
             </td>    
             
             <td>
-                <button type="button" id="edit" href="javascript:;">edit</button>
+                <button type="button" id="edit" href="javascript:;">Edit</button>
                 <button type="button" id="cancel" href="javascript:;" style="display: none;">Cancel</button>
                 
-                    <button type="submit" id="update" style="display: none;">Update</button>
+                <button type="submit" id="update" style="display: none;">Update</button>
             </form>
             
                 <form method="POST" action="{{ url_for('staff.delete_staff', id=staff.StaffID) }}" style="display: inline-block;">
-                    <button id="delete" type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                    <button id="delete" type="submit" class="" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
                 </form>
             </td>    
            
