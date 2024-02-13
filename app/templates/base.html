@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S-Mart Inventory System</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/button.css')}}"> 
     <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
     <link rel="stylesheet" href="{{url_for('static',filename='css/responsive.css')}}">
     <link rel="stylesheet" href="{{url_for('static',filename='css/cards.css')}}">
@@ -11,7 +12,7 @@
     <link rel="stylesheet" href="{{url_for('static',filename='css/preloader.css')}}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-
+    {% block css_style %}{% endblock %}
 
 </head>
 <body>
@@ -34,11 +35,12 @@
                     <div class="menu">
                         <ul class="menu-links">
                             <li class="menu-link {% block nav_dashboard %}{% endblock %}"><i class='nav-icon bx bx-home'></i><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                            <li class="menu-link {% block nav_inventory %}{% endblock %}"><i class='nav-icon bx bxs-package'></i><a href="{{ url_for('stock.index') }}">Inventory</a></li>
                             <li class="menu-link {% block nav_staff %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('staff.index') }}">Staff</a></li>
+                            <li class="menu-link {% block nav_inventory %}{% endblock %}"><i class='nav-icon bx bxs-package'></i><a href="{{ url_for('product.index') }}">Products</a></li>
                             <li class="menu-link {% block nav_category %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('category.index') }}">Category</a></li>
-                            <li class="menu-link {% block nav_report %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="#">Sales Report</a></li>
-                            <li class="menu-link {% block nav_import %}{% endblock %} "><i class='nav-icon bx bxs-group' ></i><a href="#">Import</a></li>
+                            <li class="menu-link {% block nav_supplier %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('supplier.index') }}">Supplier</a></li>
+                            <li class="menu-link {% block nav_report %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('sale.sales_index') }}">Sales</a></li>
+                            <li class="menu-link {% block nav_checkout %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('sale.show_checkout_page') }}">Check Out</a></li>
                         </ul>
                     </div>
                     <div class="bottom-content">
@@ -128,5 +130,7 @@
                 });
             });
         </script>
+
+        {% block jscontent %}{% endblock %}
     </body>
     </html>

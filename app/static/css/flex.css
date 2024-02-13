@@ -1,0 +1,123 @@
+/* Base flex container */
+.flex-container {
+    display: flex;
+    flex-wrap: nowrap; /* adjust as needed */
+    justify-content: flex-start; /* adjust as needed */
+    align-items: stretch; /* adjust as needed */
+    margin: 20px auto;
+    padding: 20px;
+  }
+  
+  /* Flex container with items spaced evenly */
+  .flex-evenly {
+    justify-content: space-evenly;
+  }
+  
+  /* Flex container with items spaced between */
+  .flex-between {
+    justify-content: space-between;
+  }
+  
+  /* Flex container with items centered horizontally and vertically */
+  .flex-center {
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Flex container with items aligned to the start */
+  .flex-start {
+    justify-content: flex-start;
+  }
+  
+  /* Flex container with items aligned to the end */
+  .flex-end {
+    justify-content: flex-end;
+  }
+  
+  /* Flex container with items aligned to the start and centered vertically */
+  .flex-start-center {
+    justify-content: flex-start;
+    align-items: center;
+  }
+  
+  /* Flex container with items aligned to the end and centered vertically */
+  .flex-end-center {
+    justify-content: flex-end;
+    align-items: center;
+  }
+  
+  /* Flex container with items aligned to the start and spaced evenly */
+  .flex-start-evenly {
+    justify-content: flex-start;
+    align-items: stretch;
+    align-content: space-evenly;
+  }
+  
+  /* Flex container with items aligned to the end and spaced evenly */
+  .flex-end-evenly {
+    justify-content: flex-end;
+    align-items: stretch;
+    align-content: space-evenly;
+  }
+  
+  /* Flex container with items wrapped */
+  .flex-wrap {
+    flex-wrap: wrap;
+  }
+  
+  /* Flex container with items wrapped and aligned to the start */
+  .flex-wrap-start {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  
+  /* Flex container with items wrapped and aligned to the end */
+  .flex-wrap-end {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  
+  /* Flex container with items wrapped and spaced evenly */
+  .flex-wrap-evenly {
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+  }
+  
+  /* Flex container with items wrapped and spaced between */
+  .flex-wrap-between {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  /* Flex container with items wrapped and centered horizontally and vertically */
+  .flex-wrap-center {
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  /* Align items at the start of the cross axis */
+.flex-align-start {
+    align-items: flex-start;
+  }
+  
+  /* Align items at the end of the cross axis */
+  .flex-align-end {
+    align-items: flex-end;
+  }
+  
+  /* Center items along the cross axis */
+  .flex-align-center {
+    align-items: center;
+  }
+  
+  /* Stretch items to fill the container along the cross axis */
+  .flex-align-stretch {
+    align-items: stretch;
+  }
+  
+  /* Align items at the baseline of the container */
+  .flex-align-baseline {
+    align-items: baseline;
+  }

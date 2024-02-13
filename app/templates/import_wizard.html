@@ -1,112 +1,115 @@
 {% extends 'base.html' %}
 {% block nav_import %}active{% endblock %}
+{% block css_style %}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
+{% endblock %}
 {% block content %}
 
     
     
+<div class="form-container">
 
-        <h1 style="text-align: center;">{% block title %} The import Page {% endblock %}</h1>
-        <form action="{{url_for('utils.excel_upload',entity=entity)}}" method="post" enctype="multipart/form-data">
-            <input type = "file" name = "file"  />
-            <input type="submit" value="IMPORT" name="upload_excel">
-            <br><br>
-        </form>
-        <style>
-            th,td{
-                padding: .5rem 1rem;
-            }
-        </style>
-    {% if info_message %}
-    <p>
-        {{info_message}}
-    </p>
-    {% endif %}
+    <h3 style="text-align: center;">{% block title %} The import Page {% endblock %}</h3>
+    <form action="{{url_for('utils.excel_upload',entity=entity)}}" method="post" enctype="multipart/form-data">
+        <input type = "file" name = "file"  />
+        <input type="submit" value="IMPORT" name="upload_excel">
         <br><br>
-    <div class="" id="preview">
-        <h3>Preview</h3>
-        <form action="{{url_for('utils.validate_exceldata',entity=entity)}}" method="post">
+    </form>
+</div>
 
-            <table border="1" name="data_table" style="font-size: 0.65rem;">
-                <thead>
-                    <tr>
-                        {% for col in column_names %}
-                        <th>
-                            <span>{{col}}</span>
-                            <input type="text" style="display: none;"   name="column_names" value="{{col}}" required>
-                        </th>
-                        {% endfor %}
-                    </tr>
-                </thead>
+{% if info_message %}
+<p>
+    {{info_message}}
+</p>
+{% endif %}
 
-                <tbody>
-                    {% for index, row in row_data.iterrows() %}
-                    <tr 
-                        {% if first_duplicate_rows.bool %}
-                            {% if index in first_duplicate_rows.index %} 
-                                style="background-color: rgb(182, 255, 195)"
-                            {% elif index in repeated_rows.index %}
-                                style="background-color: rgba(255, 182, 193, 1)"
-                            {% endif %} 
-                        {% endif %}
-                     >
-                        {% for col, row_ in zip(column_names, row) %}
-                        
-                        <td
-                            {% if (pd.isnull(row_)) or pd.isna(row[col]) or row_ == "nan" %}
-                            {% set row_ = " " %}   
-                            style="background: rgba(255,0,0,0.4);"
-                            {% endif %}
-                        >
-                            <span name="" >
-                                {% if row_data[col].dtype == 'datetime64[ns]' %}
-                                    {% if (pd.isnull(row_)) or pd.isna(row[col]) or row_ == "nan" %}
-                                        {{row_}}
-                                    
-                                    {% else %}
-                                        {{row_.strftime('%Y-%m-%d')}}
-                                    {% endif %}
-                                {% else %}
-                                    {{row_}}   
-                                {% endif %}
-                            </span>
-                            
-                            <input style="display: none;" name="{{col}}" id="" 
-                                {% if row_data[col].dtype == 'int64' %}
-                                    type="number" min="0.000000000000000" step="0.0000000000000001" value="{{row_}}"
-                                {% elif row_data[col].dtype == 'float64' %}
-                                    type="number" min="0.000000000000000" step="0.0000000000000001" value="{{row_}}"
-                                {% elif row_data[col].dtype == 'datetime64[ns]' %}
-                                    {% if (pd.isnull(row_)) or pd.isna(row[col]) or row_ == "nan" %}
-                                        type="date" value=""
-                                    {% else %}
-                                        type="date" value="{{row_.strftime('%Y-%m-%d')}}"
-                                    {% endif %}
-                                {% else %}
-                                    type="text" value="{{row_}}"
-                                {% endif %}
-                            required>
-                        </td>
-                        {% endfor %}
-                        {% if not proceed %}
-                        <td>
-                            <a id="edit" href="javascript:;">edit</a>
-                            <a id="update" href="javascript:;" name="" style="display: none;">Update</a>
-                            <a id="cancel" href="javascript:;" style="display: none;">Cancel</a>
-                            <a id="delete" href="javascript:;">delete</a>
-                        </td>
-                        {% endif %}
-                    </tr>
+<div class="table-container" id="preview">
+    <h3>Preview</h3>
+    <form action="{{url_for('utils.validate_exceldata',entity=entity)}}" method="post">
+
+        <table name="data_table" style="font-size: 0.65rem;">
+            <thead>
+                <tr>
+                    {% for col in column_names %}
+                    <th>
+                        <span>{{col}}</span>
+                        <input type="text" style="display: none;"   name="column_names" value="{{col}}" required>
+                    </th>
                     {% endfor %}
-                </tbody>
-            </table>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-            <button type="submit" name="form_step_validation">Perform validation</button>
-  
-            
-            <!-- <button {% if not repeated_rows.empty %} onclick="return confirm('Data Contains duplicate rows, are you sure to keep it in records?')" {% endif %}>  Next</button> -->
-            
-        </form>
-    </div>
+            <tbody>
+                {% for index, row in row_data.iterrows() %}
+                <tr 
+                    {% if first_duplicate_rows.bool %}
+                        {% if index in first_duplicate_rows.index %} 
+                            style="background-color: rgb(182, 255, 195)"
+                        {% elif index in repeated_rows.index %}
+                            style="background-color: rgba(255, 182, 193, 1)"
+                        {% endif %} 
+                    {% endif %}
+                    >
+                    {% for col, row_ in zip(column_names, row) %}
+                    
+                    <td
+                        {% if (pd.isnull(row_)) or pd.isna(row[col]) or row_ == "nan" %}
+                        {% set row_ = " " %}   
+                        style="background: rgba(255,0,0,0.4);"
+                        {% endif %}
+                    >
+                        <span name="" >
+                            {% if row_data[col].dtype == 'datetime64[ns]' %}
+                                {% if (pd.isnull(row_)) or pd.isna(row[col]) or row_ == "nan" %}
+                                    {{row_}}
+                                
+                                {% else %}
+                                    {{row_.strftime('%Y-%m-%d')}}
+                                {% endif %}
+                            {% else %}
+                                {{row_}}   
+                            {% endif %}
+                        </span>
+                        
+                        <input style="display: none;" name="{{col}}" id="" 
+                            {% if row_data[col].dtype == 'int64' %}
+                                type="number" min="0.000000000000000" step="0.0000000000000001" value="{{row_}}"
+                            {% elif row_data[col].dtype == 'float64' %}
+                                type="number" min="0.000000000000000" step="0.0000000000000001" value="{{row_}}"
+                            {% elif row_data[col].dtype == 'datetime64[ns]' %}
+                                {% if (pd.isnull(row_)) or pd.isna(row[col]) or row_ == "nan" %}
+                                    type="date" value=""
+                                {% else %}
+                                    type="date" value="{{row_.strftime('%Y-%m-%d')}}"
+                                {% endif %}
+                            {% else %}
+                                type="text" value="{{row_}}"
+                            {% endif %}
+                        required>
+                    </td>
+                    {% endfor %}
+                    {% if not proceed %}
+                    <td>
+                        <a id="edit" href="javascript:;">edit</a>
+                        <a id="update" href="javascript:;" name="" style="display: none;">Update</a>
+                        <a id="cancel" href="javascript:;" style="display: none;">Cancel</a>
+                        <a id="delete" href="javascript:;">delete</a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit" class="button info" name="form_step_validation">Perform validation</button>
+
+        
+        <!-- <button {% if not repeated_rows.empty %} onclick="return confirm('Data Contains duplicate rows, are you sure to keep it in records?')" {% endif %}>  Next</button> -->
+        
+    </form>
+</div>
 
     <br><br>
     <div class="">
@@ -114,21 +117,16 @@
         <form action="{{url_for('utils.final_validate',entity=entity)}}" method="post">
 
             <label for="choose_table">Choose Table: </label>
-            <!-- <select name="choose_table" id="" required>
-                <option value="">Select Table</option>
-                <option value="Table 1">Table 1</option>
-                <option value="Table 2">Table 2</option>
-                <option value="Table 3">Table 3</option>
-            </select> -->
             <button type="submit" name="DB_validation">CHECK</button>
         </form>
     </div>
     <br><br>
 
     {% if not import_method == "" or not import_method is none %}
-    <div class="form_step3">
-        <span>Replace Columns Name</span>
+    <div class="form_step3 form-container">
+        <h3>Replace Columns Name</h3>
         <input type="checkbox" name="chk_replace" value="option1" checked disabled>
+
         {% if import_method == "smart" %}
             <h3>Smart Import</h3>
             <form action="{{url_for('utils.insert_toDB',entity=entity)}}" method="post">                

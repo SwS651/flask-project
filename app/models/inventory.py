@@ -1,7 +1,7 @@
 from app.extensions import db
 
 #class Stock DB
-class Stock(db.Model):
+class Inventory(db.Model):
     id = db.Column(db.Integer, nullable=False, primary_key=True)
     BarCode = db.Column(db.String, nullable=False)
     StockName = db.Column(db.String, nullable=False)
@@ -21,5 +21,6 @@ class Stock(db.Model):
         self.Quantity = Quantity
         self.CostPricePerItem = CostPricePerItem
         self.RetailPrice = RetailPrice
+
     def _repr_(self):
-        return f'<Stock "{self.StockName}">'
+        return f'<Stock "{self.Inventory}">'

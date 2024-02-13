@@ -4,76 +4,14 @@
     Links:
     <ul>
         <li><a href="{{url_for('staff.index')}}">Staff Management</a></li>
-        <li><a href="{{url_for('stock.index')}}">Inventory/ Stock Management</a></li>
+        <li><a href="{{url_for('product.index')}}">Inventory/ Stock Management</a></li>
         <li><a href="#">Daily Sales Report</a></li>
         <li><a href="{{url_for('category.index')}}">Category</a></li>
     </ul>
     <br>
     
     Form:
-    <table border="1" style="width: 100%;">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Directory_Path</th>
-                <th>Link</th>
-
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Login</td>
-                <td>
-                    In Progress..
-                </td>
-                <td><a href="#">#</a></td>
-            </tr>
-            <tr>
-                <td>Staff</td>
-                <td>
-                    <p>/template/admin/staff_form.html</p>
-                    <p>/app/staff/routes.py</p>
-                    <p>/app/models/staff.py</p>
-
-                </td>
-                <td><a href="{{url_for('staff.create_staff')}}">{{url_for('staff.create_staff')}}</a></td>
-            </tr>
-            <tr>
-                <td>Stock</td>
-                <td>
-                    <p>/template/stock/form.html</p>
-                    <p>/app/stock/routes.py</p>
-                    <p>/app/models/stock.py</p>
-                </td>
-                <td><a href="{{url_for('stock.create_stock')}}">{{url_for('stock.create_stock')}}</a></td>
-            </tr>
-            <tr>
-                <td>Daily Sales Report</td>
-                <td>In Progress..</td>
-                <td><a href="#">#</a></td>
-            </tr>
-            <tr>
-                <td>Category</td>
-                <td>
-                    <p>/template/category.html</p>
-                    <p>/app/category/routes.py</p>
-                    <p>/app/models/category.py</p>
-
-                </td>
-                <td><a href="{{url_for('category.create_category')}}">{{url_for('category.create_category')}}</a></td>
-            </tr>
-            <tr>
-                <td>Table Builder</td>
-                <td>In Progress..</td>
-                <td><a href="#">#</a></td>
-            </tr>
-            <tr>
-                <td>Import</td>
-                <td>In Progress..</td>
-                <td><a href="#">#</a></td>
-            </tr>
-        </tbody>
-    </table>
+    
 
     <br><br><br>
     Website Theme:

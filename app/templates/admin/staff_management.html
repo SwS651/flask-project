@@ -1,4 +1,15 @@
 {% extends 'base.html' %}
+
+
+{% block css_style %} 
+
+    <link rel="stylesheet" href="{{url_for('static',filename='css/flex.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/grid.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/modal.css')}}"> 
+
+{% endblock %}
 {% block nav_staff %}active{% endblock %}
 {% block content %}
 <a href="{{url_for('staff.create_staff')}}" class="btn" >Add New</a> <br><br>
@@ -7,57 +18,64 @@
     <input type="submit" name="upload_excel" value="IMPORT">
     <br><br>
 </form>
-<table border="1"  style="width: 100%;">
-    <thead>
-        <tr>
-            {% for colname in column_names if colname not in ['id','Password'] %}
-            
-            <th>{{ colname }}</th>
-            {% endfor %}
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for staff in staffs %}
-        <tr>
-            <form method="POST" action="{{ url_for('staff.edit_staff', id=staff.StaffID) }}" style="display: inline-block;">
-            <td>
-                <span>{{ staff.StaffID}}</span>
-                <input type="text" style="display: none;" name="staff_id" id="staff_id" value="{{staff.StaffID}}" required>
-            </td>      
-            <td>
-                <span>{{ staff.StaffName}}</span>
-                <input type="text" style="display: none;" name="staff_name" id="staff_name" value="{{staff.StaffName}}" required>
-            </td>      
-            <td>
-                <span>{{ staff.StaffEmail}}</span>
-                <input type="email" style="display: none;" name="staff_email" id="staff_name" value="{{staff.StaffEmail}}" required>
-
-            </td>      
-
-            <td>
-                <!-- <span>{{ staff.Role}}</span> -->
+<form action="" method="get">
+    <input type="text" name="search" placeholder="Search Field" required>
+    <button type="submit" class="button primary">Search</button>
+</form>
+<div class="table-container maxheight-800 scrollable">
+    <table >
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for staff in staffs %}
+            <tr>
+                <form method="POST" action="{{ url_for('staff.edit_staff', id=staff.id) }}" style="display: inline-block;">
+                <td>
+                    <span><a href="{{url_for('staff.get_staff',id = staff.id)}}">{{ staff.id}}</a></span>
+                    <input type="text" style="display: none;" name="staff_id" id="staff_id" value="{{staff.id}}" required>
+                </td>      
+                <td>
+                    <span><a href="{{url_for('staff.get_staff',id = staff.id)}}">{{ staff.Name}}</a></span>
+                    <input type="text" style="display: none;" name="staff_name" id="staff_name" value="{{staff.Name}}" required>
+                </td>      
+                <td>
+                    <span>{{ staff.Email}}</span>
+                    <input type="email" style="display: none;" name="staff_email" id="staff_name" value="{{staff.Email}}" required>
+    
+                </td>      
+    
+                <td>
+                    <!-- <span>{{ staff.Role}}</span> -->
+                    
+                    <input type="radio" name="role" id="admin" value="admin" {% if staff.Role == 'admin' %} checked {% endif %} disabled><label for="admin">admin</label>
+                    <input type="radio" name="role" id="staff" value="staff" {% if staff.Role == 'staff' %} checked {% endif %} disabled><label for="staff">staff</label>
+                </td>    
                 
-                <input type="radio" name="role" id="admin" value="admin" {% if staff.Role == 'admin' %} checked {% endif %} disabled><label for="admin">admin</label>
-                <input type="radio" name="role" id="staff" value="staff" {% if staff.Role == 'staff' %} checked {% endif %} disabled><label for="staff">staff</label>
-            </td>    
-            
-            <td>
-                <button type="button" id="edit" href="javascript:;">Edit</button>
-                <button type="button" id="cancel" href="javascript:;" style="display: none;">Cancel</button>
-                
-                <button type="submit" id="update" style="display: none;">Update</button>
-            </form>
-            
-                <form method="POST" action="{{ url_for('staff.delete_staff', id=staff.StaffID) }}" style="display: inline-block;">
-                    <button id="delete" type="submit" class="" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                <td>
+                    <button type="button" class="button info" id="edit" href="javascript:;"><i class='bx bx-edit'></i></button>
+                    <button type="submit" class="button info" id="update" style="display: none;"><i class='bx bx-check'></i></button>
+                    <button type="button" class="button gray" id="cancel" href="javascript:;" style="display: none;"><i class='bx bx-x'></i></button>
+                    
                 </form>
-            </td>    
-           
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                
+                    <form method="POST" action="{{ url_for('staff.delete_staff', id=staff.id) }}" style="display: inline-block;">
+                        <button id="delete" type="submit" class="button error" onclick="return confirm('Are you sure you want to delete this item?')"><i class='bx bx-trash-alt'></i></button>
+                    </form>
+                </td>    
+               
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 
 
 <script type="text/javascript">

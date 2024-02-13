@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block css_style %}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/grid.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/category.css')}}"> 
+{% endblock %}
+{% block nav_inventory %}active{% endblock %}
+{% block content %}
+    <div class="grid-container four-two-grid">
+        <div class="grid-item">
+
+            <div class="form-container full_width">
+            <h3>Edit Product</h3>
+    
+                <form method="POST" action="{{ url_for('product.edit_product',barcode = product.BarCode) }}">
+                    <!-- Add any necessary form fields and styling as needed -->
+                    <label for="barcode">Barcode:</label>
+                    <input type="text" inputmode="numeric" pattern="\d*" id="barcode" name="barcode" value="{{product.BarCode}}" autocomplete="false" required>
+                    <label for="name">Product Name:</label>
+                    <input type="text" id="name" name="name" autocomplete="false" value="{{product.Name}}" required>
+                    
+        
+                    <label for="quantity">Safety Quantity:</label>
+                    <input type="number" id="" name="safety_quantity" min="-1" value="{{product.Safety_quantity}}" required>
+        
+                    <label for="status">Status</label>
+                    <input type="radio"  name="status" value="NotAvailable" {% if product.Status == "NotAvailable" %} Checked {% endif %}> <span>Not NotAvailable</span><br>
+                    <input type="radio"  name="status" value="InStock" {% if product.Status == "InStock" %} Checked {% endif %}> <span>In Stock</span><br>
+                    <input type="radio"  name="status" value="OutOfStock" {% if product.Status == "OutOfStock" %} Checked {% endif %}> <span> Out Of Stock</span><br>
+                    <br>
+                    <!-- Add other form fields as needed -->
+        
+                    <button class="button info" type="submit">Save Changes</button>
+                </form>
+            </div> 
+
+            <div class="table-container">
+                <h3>Available Inventory</h3>
+                <table style="width: 100%;" class="">
+                    <thead>
+                        <tr>
+                            
+                            <th>Store-In</th>
+                            <th>Expiry-Date</th>
+                            <th>Supplier</th>
+                            <th>Init QTY</th>
+                            <th>Available QTY</th>
+                            <th>Locked QTY</th>
+                            <th>Lost QTY</th>
+                            <th>Sold QTY</th>
+                            <th>Cost Price (Per Item)</th>
+                            <th>Retail Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inventory in product.Inventories %}
+                            <tr>
+                                <form method="POST" action="" style="display: inline-block;">
+                                    <td>
+                                        <span>{{ inventory.StockInDate }}</span>
+                                        <input type="date" style="display: none;" name="StockInDate" id="StockInDate" value="{{ inventory.StockInDate }}" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.ExpiryDate }}</span>
+                                        <input type="date" style="display: none;" name="ExpiryDate" id="ExpiryDate" value="{{ inventory.ExpiryDate }}" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.Supplier_id }}</span>
+                                        <input type="text" style="display: none;" name="supplier_id" id="" value="{{ inventory.Supplier_id }}" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.Init_QTY }}</span>
+                                        <input type="number" style="display: none;" name="init_QTY" id="init_QTY" value="{{ inventory.Init_QTY }}" min="0" step="1" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.Available_QTY }}</span>
+                                        <input type="number" style="display: none;" name="available_QTY" id="available_QTY" value="{{ inventory.Available_QTY }}" min="0" step="1" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.Locked_QTY }}</span>
+                                        <input type="number" style="display: none;" name="locked_QTY" id="locked_QTY" value="{{ inventory.Locked_QTY }}" min="0" step="1" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.Lost_QTY}}</span>
+                                        <input type="number" style="display: none;" name="lost_QTY" id="lost_QTY" value="{{ inventory.Lost_QTY }}" min="0" step="1" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.Sold_QTY }}</span>
+                                        <input type="number" style="display: none;" name="sold_QTY" id="sold_QTY" value="{{ inventory.Sold_QTY }}" min="0" step="1" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.CostPerItem }}</span>
+                                        <input type="number" style="display: none;" name="CostPricePerItem" id="CostPricePerItem" value="{{ inventory.CostPerItem }}" min=0.00 step="0.01" required>
+                                    </td>
+                                    <td>
+                                        <span>{{ inventory.RetailPrice }}</span>
+                                        <input type="number" style="display: none;" name="retail_price" id="retail_price" value="{{ inventory.RetailPrice }}" min=0.00 step="0.01" required>
+                                    </td>
+                                </form>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+
+        </div>
+        <div class="grid-item">
+            
+    
+            <div class="form-container">
+                <h3>Inventory Store-In</h3>
+                <form action="{{url_for('product.add_inventory',barcode = product.BarCode)}}" method="post">
+                    
+                    <input type="text" style="display: none;" name="barcode" id="" value="{{product.BarCode}}" disabled>
+                    <input type="text" name="name" id="" value="{{product.Name}}" disabled>
+                    <select name="supplier" id="" required>
+                        <option value="">Select Suppier</option>
+                        {% for supplier in suppliers %} 
+                        <option value="{{supplier.Name}}">{{supplier.Name}}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="Store-In-Date">Store-In-Date</label>
+                    <input type="date" name="storein_date" id="" placeholder="" required>
+                    <label for="Expiry-Date">Expiry-Date</label>
+                    <input type="date" name="expiry_date" id="" placeholder="" required>
+                    <label for="Quantity">Quantity</label>
+                    <input type="number" name="quantity" id="" placeholder="" min="0" step="1" value="0" required>
+                    <label for="Cost-Price-Per-Item">Cost-Price-Per-Item</label>
+                    <input type="number" name="cost_per_item" id="" placeholder="0.00" min="0.00" step="0.01" value="0" required>
+                    <label for="Cost-Price-Per-Item">Retail Price</label>
+                    <input type="number" name="retail_price" id="" placeholder="0.00" min="0.00" step="0.01" value="0" required>
+        
+                    <button class="button success" type="submit">Add</button>
+                </form>
+            </div>
+        
+            <div class="form-container">
+                <h3>Category</h3>
+                <form action="{{url_for('category.create_category')}}" method="post">
+                      <input type="text" name="category_name" id="" placeholder="Food.." autocomplete="false" required>
+                      <button class="button success" type="submit">Add</button>
+                </form>
+                <form action="{{url_for('product.edit_product',barcode = product.BarCode)}}" method="post">
+
+                    <ul class="category-list">
+                        {% for category in categories %}
+                        
+                        <li class="category-item">
+                            <input type="checkbox"  name="category_ids" class="category-input" value="{{category.Name}}" {% for cat in product.Categories %} {% if cat.Name == category.Name %} checked {% endif %}{% endfor %}>
+                            <label for="category" class="category-label">{{category.Name}}</label>
+                        </li>
+                        {% endfor %}
+                        
+                    </ul>
+                    <button class="button info" type="submit" name="save_category">Save Changes</button>
+                </form>
+            </div>
+          </div>
+    </div>
+
+    
+{% endblock %}

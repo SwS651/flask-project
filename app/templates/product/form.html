@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block css_style %}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/grid.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/category.css')}}"> 
+{% endblock %}
+{% block nav_inventory %}active{% endblock %}
+{% block content %}
+    <div class="grid-container four-two-grid">
+        <div class="grid-item">
+          First Column (4/6)
+            
+        </div>
+        <div class="grid-item">
+            <div class="form-container">
+                <h3>Create Product</h3>
+        
+                <form method="POST" action="{{ url_for('product.create_product') }}">
+                    <!-- Add any necessary form fields and styling as needed -->
+                    <label for="barcode">Barcode:</label>
+                    <input type="text" inputmode="numeric" pattern="\d*" id="barcode" name="barcode"  autocomplete="false" required>
+                    <label for="name">Product Name:</label>
+                    <input type="text" id="name" name="name" autocomplete="false" required>
+        
+                    <label for="category">Category:</label>
+                    <select id="categories" required>
+                    {% if not categories.empty %}
+                        {% for category in categories %}
+                            <option value={{category}}>{{category}}</option>
+                        {% endfor %}
+                    {% endif %}
+                    </select>
+        
+                    <label for="quantity">Quantity Number:</label>
+                    <input type="number" id="quantity" name="quantity" value="0" min="0" required>
+        
+                    <label for="retail_price">Retail Price:</label>
+                    <input type="number" id="retail_price" name="retail_price" step="0.01" min="0" required>
+        
+                    <!-- Add other form fields as needed -->
+        
+                    <button type="submit">Create Product</button>
+                </form>
+            </div>
+    
+            <div class="form-container">
+                <h3>Inventory Store-In</h3>
+                <form action="" method="post">
+                    
+                    <label for="Store-In-Date">Store-In-Date</label>
+                    <select name="product" id="" required>
+                        <option value="">-- Select Product --</option>
+                        <option value="KitKat">KitKat</option>
+                    </select>
+        
+                    <label for="Store-In-Date">Store-In-Date</label>
+                    <input type="date" name="storein_date" id="" placeholder="" required>
+                    <label for="Expiry-Date">Expiry-Date</label>
+                    <input type="date" name="expiry_date" id="" placeholder="" required>
+                    <label for="Quantity">Quantity</label>
+                    <input type="number" name="quantity" id="" placeholder="" min="0" step="1" value="0" required>
+                    <label for="Cost-Price-Per-Item">Cost-Price-Per-Item</label>
+                    <input type="number" name="cost_per_item" id="" placeholder="" min="0.00" step="0.01" value="0" required>
+        
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+        
+            <div class="form-container">
+                <h3>Category</h3>
+                <form action="" method="post">
+                      <input type="text" name="category" id="" placeholder="Food.." autocomplete="false" required>
+                      <button type="submit">Add</button>
+                </form>
+                <ul class="category-list">
+                  <li class="category-item">
+                    <input type="radio" id="category1" name="category" class="category-input">
+                    <label for="category1" class="category-label">Category 1</label>
+                  </li>
+              
+                  <li class="category-item">
+                    <input type="radio" id="category2" name="category" class="category-input">
+                    <label for="category2" class="category-label">Category 2</label>
+                  </li>
+              
+                  <li class="category-item">
+                    <input type="radio" id="category3" name="category" class="category-input">
+                    <label for="category3" class="category-label">Category 3</label>
+                  </li>
+                </ul>
+            </div>
+          </div>
+    </div>
+
+    
+{% endblock %}

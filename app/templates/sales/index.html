@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block css_style %} 
+
+    <link rel="stylesheet" href="{{url_for('static',filename='css/grid.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/modal.css')}}"> 
+
+{% endblock %}
+{% block nav_report %}active{% endblock %}
+{% block content %}
+
+    <div class="grid-container two-grid">
+        <div class="grid-item">
+            Amount Sales Today
+            <div class="table-container maxheight full_width scrollable">
+
+                <table class="">
+                    <thead>
+                        <tr>
+                            <th>Staff ID</th>
+                            <th>Name</th>
+                            <th>Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       {% for record in staff_totals %}
+                       <tr>
+
+                           <td>{{record.Staff_id}}</td>
+                           <td>{{record.Name}}</td>
+                           <td>{{record.Total_Amount}}</td>
+                        </tr>
+                       {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="grid-item">
+            Product Sales Today
+           
+                <div class="table-container maxheight scrollable full_width">
+
+                <table class="">
+                    <thead>
+                        <tr>
+                           <th>Product</th>
+                           <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>{{product.Name}}</td>
+                                <td>{{ product.Quantity }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-container">
+        <h1>Date Search</h1>
+        <form action="{{url_for('sale.search_sales')}}" method="GET">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required>
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" required>
+            <button type="submit" class="button gray">Search</button>
+        </form>
+        <br><br>
+        <table>
+            <tr> 
+                <th>No</th>
+                <th>Date</th>
+                <th>Tax</th>
+                <th>Discount</th>
+                <th>Type</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            {% for sale in sales %}
+            <tr> 
+                <td>{{sale.id}}</td>
+                <td>{{sale.Date}}</td>
+                <td>{{sale.Tax}}</td>
+                <td>{{sale.Discount}}</td>
+                <td>{{sale.Type_Payment}}</td>
+                <td>{{sale.Total}}</td>
+                <td>{{sale.Status}}</td>
+                {% if sale.Status == "draft" %}
+                <td><a href="{{url_for('sale.show_checkout_page')}}">Edit</a></td>
+                {% else %}
+                <td><a href="{{url_for('sale.get_sale_detail',id = sale.id)}}">view</a></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+    
+{% endblock %}
+
+{% block jscontent %}
+
+<script>
+    var btnEdits = document.querySelectorAll('#edit');
+    var btnCancels = document.querySelectorAll('#cancel');
+    var btnUpdate = document.querySelectorAll('#update');
+    var btnDelete = document.querySelectorAll('#delete');
+
+    btnEdits.forEach((btnEdit)=>{
+        btnEdit.addEventListener('click',editable);
+    });
+    
+    btnCancels.forEach((btnCancel)=>{
+        btnCancel.addEventListener('click',editable)
+    });
+
+    function editable(event) {
+        var row = event.target.closest('tr');
+        var inputElements = row.querySelectorAll('input:not([type=radio])');
+        var spanElements = row.querySelectorAll('span');
+
+        inputElements.forEach((inputElement) => {
+            inputElement.style.display = (inputElement.style.display === 'none') ? 'inline-block' : 'none';
+        });
+        spanElements.forEach((spanElement) => {
+            spanElement.style.display = (spanElement.style.display === 'none') ? 'inline-block' : 'none';
+        });
+            // Toggle the display of the edit, update, and cancel links
+        row.querySelector('#edit').style.display = (row.querySelector('#edit').style.display === 'none') ? 'inline-block' : 'none';
+        row.querySelector('#update').style.display = (row.querySelector('#update').style.display === 'none') ? 'inline-block' : 'none';
+        row.querySelector('#cancel').style.display = (row.querySelector('#cancel').style.display === 'none') ? 'inline-block' : 'none';
+        row.querySelector('#delete').style.display = (row.querySelector('#delete').style.display === 'none') ? 'inline-block' : 'none';
+    }
+
+    function changeFormAction(button){
+        var closesttd = button.parentElement;
+        var form = closesttd.parentElement;
+        if(form){
+            var barcodeInput = form.querySelector('#barcode');
+            //
+            console.log(barcodeInput)
+        }else{
+            console.log('Form not found')
+        }
+    }
+
+</script>
+
+
+<script>
+    function openModal() {
+      document.getElementById('create_product').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('create_product').style.display = 'none';
+    }
+  </script>
+{% endblock %}
