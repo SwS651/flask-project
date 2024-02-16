@@ -1,5 +1,8 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
+from statistics import mean
 from flask import Flask, render_template, request, redirect, url_for
+from sqlalchemy import extract
+
 from config import Config
 from app.extensions import db
 
@@ -10,7 +13,11 @@ from app.models.product import Product,Inventory
 from app.models.supplier import Supplier
 
 # from app.models.dailysalesreport import DailySalesReport,Sale
-from app.models.sale import Sale
+from app.models.sale import Sale,Sale_Item
+
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+from app.plotly_graphs import *
 
 def create_app(config_class = Config):
     app = Flask(__name__)
@@ -46,6 +53,42 @@ def create_app(config_class = Config):
         
     @app.route('/')
     def dashboard():
+        # inventories = Inventory.query.all()
+        # categories = Category.query.all()
+        # products = Product.query.all()
+        # Monthly Profit
+        
+
+        product_proportion = show_product_proportion_pie()
+        sales_graph = show_sales_graph()
+        turnover_bar = show_inventory_turnover_graph()
+        vertical_product_bar = show_prodcut_vertical_bar()
+        lost_cost_bar = show_product_lost_cost_bar()
+
+
+        # Convert the pie chart to JSON format
+        product_proportion_pie = product_proportion.to_json()
+        sales_graph = sales_graph.to_json()
+        turnover_bar = turnover_bar.to_json()
+        vertical_product_bar = vertical_product_bar.to_json()
+
+        lost_cost_bar =lost_cost_bar.to_json()
+        product_count,sale_count,total_supplier,total_staff = all_Model_value_total()
+        # total_suppkier = Supplier.query(db.func.sum())
+        return render_template('index.html', sales_graph = sales_graph,
+                               product_proportion_pie= product_proportion_pie,
+                               turnover_bar = turnover_bar,
+                               vertical_product_bar=vertical_product_bar,
+                               lost_cost_bar = lost_cost_bar,
+                               product_count = product_count,sale_count = sale_count,total_supplier = total_supplier,total_staff = total_staff
+                               )
+    
+
+    
+
+
+    @app.route('/init_data')
+    def initdata():
         product_table = db.metadata.tables["product"]
         # query = db.session.execute(db.select(product_table).filter_by(BarCode=3927110))
         query = Product.query.filter(Product.BarCode == 3927110)
@@ -60,9 +103,7 @@ def create_app(config_class = Config):
             db.session.commit()
             
             product1 = Product( BarCode = 3927110,Name = "KitKat",Safety_quantity = -1,Status="NotAvailable")
-            inventory1 = Inventory(product = product1,Supplier_id = supplier.id,StockInDate = datetime.strptime("2023-11-12", '%Y-%m-%d'),ExpiryDate = datetime.strptime("2024-6-18", '%Y-%m-%d'),Init_QTY=100,Available_QTY=0,Locked_QTY= 0,Lost_QTY=0,Sold_QTY=100,CostPerItem=2.50,RetailPrice=3.00)
-            inventory2 = Inventory(product = product1,Supplier_id = supplier.id,StockInDate = datetime.strptime("2024-1-12", '%Y-%m-%d'),ExpiryDate = datetime.strptime("2025-4-30", '%Y-%m-%d'),Init_QTY=100,Available_QTY=10,Locked_QTY= 0,Lost_QTY=0,Sold_QTY=90,CostPerItem=2.50,RetailPrice=3.00)
-            inventory3 = Inventory(product = product1,Supplier_id = supplier.id,StockInDate = datetime.strptime("2024-2-2", '%Y-%m-%d'),ExpiryDate = datetime.strptime("2025-4-30", '%Y-%m-%d'),Init_QTY=100,Available_QTY=100,Locked_QTY= 0,Lost_QTY=0,Sold_QTY=0,CostPerItem=2.70,RetailPrice=3.10)
+            inventory1 = Inventory(product = product1,Supplier_id = supplier.id,StockInDate = datetime.strptime("2024-2-2", '%Y-%m-%d'),ExpiryDate = datetime.strptime("2025-4-30", '%Y-%m-%d'),Init_QTY=100,Available_QTY=100,Locked_QTY= 0,Lost_QTY=0,Sold_QTY=0,CostPerItem=2.50,RetailPrice=3.10)
             cat1 = Category(Name="Drink")
             cat2 = Category(Name="Snack")
             cat3 = Category(Name="Chocolate")
@@ -73,17 +114,11 @@ def create_app(config_class = Config):
             product1.Categories.append(cat5)
 
             db.session.add_all([product1])
-            db.session.add_all([inventory1,inventory2,inventory3])
+            db.session.add_all([inventory1])
             db.session.add_all([cat1,cat2,cat3,cat4,cat5])
             db.session.commit()
 
-            # dailyreport = DailySalesReport(Staff_id = staff.id,Date = datetime.today())
-            # salesdetail = Sale(daily_sales_report = dailyreport,Quantity=4,SalePrice=3.00,Subtotal=12.00,Inventory_id = inventory1.id)
-            
-            # db.session.add_all([dailyreport])
-            # db.session.add_all([salesdetail])
-            # db.session.commit()
-        return render_template('index.html')
+        return redirect(url_for('/'))
     
     @app.route('/login',methods=['GET','POST'])
     def login():
@@ -102,6 +137,59 @@ def create_app(config_class = Config):
 
 
     return app
+
+def all_Model_value_total():
+    total_supplier = Supplier.query.count()
+    total_staff = Staff.query.count()
+    total_products = Product.query.count()
+    total_inventories = Inventory.query.count()
+    total_categories = Category.query.count()
+    out_of_stock_products = Product.query.filter_by(Status='OutOfStock').count()
+    not_available_products = Product.query.filter_by(Status='NotAvailable').count()
+    in_stock_products = Product.query.filter_by(Status='InStock').count()
+    total_sold = db.session.query(db.func.sum(Inventory.Sold_QTY)).scalar()
+    total_inventory_cost = db.session.query(db.func.sum(Inventory.CostPerItem * Inventory.Init_QTY)).scalar()
+    below_safety_level_products = Product.query.filter(Product.Safety_quantity!=-1,Product.Safety_quantity > Product.Inventories.any(Inventory.Available_QTY)).count()
+    expired_products = Inventory.query.filter(Inventory.ExpiryDate < date.today()).count()
+    inventory_lost = db.session.query(db.func.sum(Inventory.Lost_QTY)).scalar()
+    lost_cost = db.session.query(db.func.sum(Inventory.CostPerItem * Inventory.Lost_QTY)).scalar()
+
+
+    # Sales Count
+    total_sales = Sale.query.count()
+    # Calculate total monthly profit
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    total_monthly_profit = db.session.query(db.func.sum(Sale.Total - (Sale_Item.Quantity * Inventory.CostPerItem))) \
+        .join(Sale_Item).join(Inventory).filter(db.func.extract('year', Sale.Date) == current_year, db.func.extract('month', Sale.Date) == current_month).scalar()
+    # Calculate daily sales and daily profit
+    today = date.today()
+    total_daily_sales = Sale.query.filter_by(Date=today).count()
+    total_daily_profit = db.session.query(db.func.sum(Sale.Total - (Sale_Item.Quantity * Inventory.CostPerItem))) \
+        .join(Sale_Item).join(Inventory).filter(Sale.Date == today).scalar()
+    
+    
+
+    # Create plotly visualization for products by status
+    product_count = {'total':total_products,
+                     'categories':total_categories,
+                     'OutOfStock': out_of_stock_products, 
+                     'NotAvailable': not_available_products,
+                     'total_inventories':total_inventories,
+                     'total_sold':total_sold,
+                     'in_stock_products':in_stock_products,
+                     'total_inventory_cost': total_inventory_cost,
+                     'below_safety_level_products':below_safety_level_products,
+                     'expired':expired_products,
+                     'inventory_lost':inventory_lost,
+                     'lost_cost':lost_cost
+                     }
+    sale_count = {'total_sales':total_sales,
+                  'total_monthly_profit': "%.2f" % total_monthly_profit,
+                  'total_daily_sales':total_daily_sales,
+                  'total_daily_profit':  "%.2f" % total_daily_profit
+                  }
+    return product_count,sale_count,total_supplier,total_staff
 
 if __name__ == "__main__":
     app = create_app()

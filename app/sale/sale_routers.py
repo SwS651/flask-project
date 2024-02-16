@@ -46,7 +46,7 @@ def search_sales():
 
 def create_sale():
     sale = Sale(
-        Staff_id=204542, 
+        Staff_id=1, 
         Date = datetime.today(), 
         Tax = 0,
         Discount = 0, 
@@ -71,7 +71,7 @@ def show_checkout_page():
     products = Product.query.filter(Product.Status == "InStock").all()
     sale = get_draft_sale()
     if sale:
-        sale.Staff_id = 204542
+        sale.Staff_id = 1
         sale.Date = datetime.today()
         update_sale_Total(sale.id)
         db.session.commit()
@@ -180,8 +180,8 @@ def finalize_checkout(id):
     sale_item = Sale_Item.query.filter(Sale_Item.Report_id == sale.id).first()
     
     inventory = Inventory.query.filter(Inventory.id == sale_item.Inventory_id).first()
-    inventory.Sold_QTY = sale_item.Quantity
-    inventory.Locked_QTY = 0
+    inventory.Sold_QTY += sale_item.Quantity
+    inventory.Locked_QTY -= sale_item.Quantity
     db.session.commit()
     print(inventory)
 

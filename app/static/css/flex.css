@@ -1,123 +1,118 @@
 /* Base flex container */
 .flex-container {
-    display: flex;
-    flex-wrap: nowrap; /* adjust as needed */
-    justify-content: flex-start; /* adjust as needed */
-    align-items: stretch; /* adjust as needed */
-    margin: 20px auto;
-    padding: 20px;
-  }
-  
-  /* Flex container with items spaced evenly */
-  .flex-evenly {
-    justify-content: space-evenly;
-  }
-  
-  /* Flex container with items spaced between */
-  .flex-between {
-    justify-content: space-between;
-  }
-  
-  /* Flex container with items centered horizontally and vertically */
-  .flex-center {
-    justify-content: center;
-    align-items: center;
-  }
-  
-  /* Flex container with items aligned to the start */
-  .flex-start {
-    justify-content: flex-start;
-  }
-  
-  /* Flex container with items aligned to the end */
-  .flex-end {
-    justify-content: flex-end;
-  }
-  
-  /* Flex container with items aligned to the start and centered vertically */
-  .flex-start-center {
-    justify-content: flex-start;
-    align-items: center;
-  }
-  
-  /* Flex container with items aligned to the end and centered vertically */
-  .flex-end-center {
-    justify-content: flex-end;
-    align-items: center;
-  }
-  
-  /* Flex container with items aligned to the start and spaced evenly */
-  .flex-start-evenly {
-    justify-content: flex-start;
-    align-items: stretch;
-    align-content: space-evenly;
-  }
-  
-  /* Flex container with items aligned to the end and spaced evenly */
-  .flex-end-evenly {
-    justify-content: flex-end;
-    align-items: stretch;
-    align-content: space-evenly;
-  }
-  
-  /* Flex container with items wrapped */
-  .flex-wrap {
-    flex-wrap: wrap;
-  }
-  
-  /* Flex container with items wrapped and aligned to the start */
-  .flex-wrap-start {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-  
-  /* Flex container with items wrapped and aligned to the end */
-  .flex-wrap-end {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  
-  /* Flex container with items wrapped and spaced evenly */
-  .flex-wrap-evenly {
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-  }
-  
-  /* Flex container with items wrapped and spaced between */
-  .flex-wrap-between {
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-  
-  /* Flex container with items wrapped and centered horizontally and vertically */
-  .flex-wrap-center {
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-  }
+  display: flex;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.flex {display: flex;}
+
+/* Flex container with justify-content */
+.flex-justify-start { justify-content: flex-start; }
+.flex-justify-end { justify-content: flex-end; }
+.flex-justify-center { justify-content: center; }
+.flex-justify-between { justify-content: space-between; }
+.flex-justify-evenly { justify-content: space-evenly; }
+
+/* Flex container with align-items */
+.flex-item-start { align-items: flex-start; }
+.flex-item-end { align-items: flex-end; }
+.flex-item-center { align-items: center; }
+.flex-item-stretch { align-items: stretch; }
+.flex-item-baseline { align-items: baseline; }
+
+/* Flex container with align-content */
+.flex-content-start { align-content: flex-start; }
+.flex-content-end { align-content: flex-end; }
+.flex-content-center { align-content: center; }
+.flex-content-stretch { align-content: stretch; }
+.flex-content-around { align-content: space-around; }
+.flex-content-between { align-content: space-between; }
+
+/* Flex container with items aligned to start or end, centered vertically */
+.flex-start-start { justify-content: flex-start; align-items: flex-start; }
+.flex-start-end {justify-content: flex-start; align-items: flex-end; }
+.flex-start-center{ justify-content: flex-start; align-items: center; }
+.flex-start-stretch { justify-content: flex-start; align-items: stretch; }
+.flex-start-baseline { justify-content: flex-start; align-items:baseline; }
 
 
-  /* Align items at the start of the cross axis */
-.flex-align-start {
-    align-items: flex-start;
-  }
-  
-  /* Align items at the end of the cross axis */
-  .flex-align-end {
-    align-items: flex-end;
-  }
-  
-  /* Center items along the cross axis */
-  .flex-align-center {
-    align-items: center;
-  }
-  
-  /* Stretch items to fill the container along the cross axis */
-  .flex-align-stretch {
-    align-items: stretch;
-  }
-  
-  /* Align items at the baseline of the container */
-  .flex-align-baseline {
-    align-items: baseline;
-  }
+.flex-start-around { justify-content: flex-start; align-content: space-around; }
+.flex-start-between { justify-content: flex-start; align-content: space-between; }
+.flex-start-evenly { justify-content: flex-start; align-content: space-evenly; }
+
+.flex-end-start { justify-content: flex-end; align-items: flex-start; }
+.flex-end-end { justify-content: flex-end; align-items: flex-end; }
+.flex-end-center { justify-content: flex-end; align-items: center; }
+.flex-end-stretch { justify-content: flex-end; align-items:stretch; }
+.flex-end-baseline { justify-content: flex-end; align-items:baseline; }
+
+
+.flex-end-around { justify-content: flex-end; align-content: space-around; }
+.flex-end-between { justify-content: flex-end; align-content: space-between; }
+.flex-end-evenly { justify-content: flex-end; align-content: space-evenly; }
+
+.flex-center-start { justify-content: center; align-items: flex-start; }
+.flex-center-end { justify-content: center; align-items: flex-end; }
+.flex-center-center { justify-content: center; align-items: center; }
+.flex-center-stretch { justify-content: center; align-items:stretch; }
+.flex-center-baseline { justify-content: center; align-items:baseline; }
+
+
+.flex-center-around { justify-content: center; align-content: space-around; }
+.flex-center-between { justify-content: center; align-content: space-between; }
+.flex-center-evenly { justify-content: center; align-content: space-evenly; }
+
+.flex-between-start { justify-content: space-between; align-items: flex-start; }
+.flex-between-end { justify-content: space-between; align-items: flex-end; }
+.flex-between-center { justify-content: space-between; align-items: center; }
+.flex-between-stretch { justify-content: space-between; align-items:stretch; }
+.flex-between-baseline { justify-content: space-between; align-items:baseline; }
+
+
+.flex-between-around { justify-content: space-between; align-content: space-around; }
+.flex-between-between { justify-content: space-between; align-content: space-between; }
+.flex-between-evenly { justify-content: space-between; align-content: space-evenly; }
+
+.flex-around-start { justify-content: space-around; align-items: flex-start; }
+.flex-around-end { justify-content: space-around; align-items: flex-end; }
+.flex-around-center { justify-content: space-around; align-items: center; }
+.flex-around-stretch { justify-content: space-around; align-items:stretch; }
+.flex-around-baseline { justify-content: space-around; align-items:baseline; }
+
+
+.flex-around-around { justify-content: space-around; align-content: space-around; }
+.flex-around-between { justify-content: space-around; align-content: space-between; }
+.flex-around-evenly { justify-content: space-around; align-content: space-evenly; }
+
+.flex-evenly-start { justify-content: space-evenly; align-items: flex-start; }
+.flex-evenly-end { justify-content: space-evenly; align-items: flex-end; }
+.flex-evenly-center { justify-content: space-evenly; align-items: center; }
+.flex-evenly-stretch { justify-content: space-evenly; align-items:stretch; }
+.flex-evenly-baseline { justify-content: space-evenly; align-items:baseline; }
+
+
+.flex-evenly-around { justify-content: space-evenly; align-content: space-around; }
+.flex-evenly-between { justify-content: space-evenly; align-content: space-between; }
+.flex-evenly-evenly { justify-content: space-evenly; align-content: space-evenly; }
+
+
+
+/* Flex container with items wrapped */
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap {flex-wrap: nowrap;}
+
+.flex-direction {flex-direction: column;}
+.flex-direction {flex-direction: column-reverse;}
+.flex-direction {flex-direction: row;}
+.flex-direction {flex-direction: row-reverse;}
+
+.flex-container {
+  display: flex;
+  flex-wrap: nowrap; /* adjust as needed */
+  justify-content: flex-start; /* adjust as needed */
+  align-items: stretch; /* adjust as needed */
+  margin: 20px auto;
+  padding: 20px;
+}
+
