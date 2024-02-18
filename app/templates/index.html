@@ -2,6 +2,7 @@
 {% block nav_dashboard %}active{% endblock %}
 {% block css_style %}
     <link rel="stylesheet" href="{{url_for('static',filename='css/cards.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
  
 {% endblock %}
 {% block content %}
@@ -123,6 +124,36 @@
     </div>
     
 </div>
+{% if inventory_warning %}
+<div class="grid grid-column-3">
+    <div class="card">
+        <div class="card-header">Prodcuts under safety line</div>
+        <div class="card-contents">
+            
+            <table>
+                <tr>
+                <th>Product</th>
+                <th>Safety Line</th>
+                <th>Available QTY</th>
+                </tr>
+                <tr>
+                    {% for pro in inventory_warning %}
+                    {% set available_QTY = pro.Inventories | map(attribute='Available_QTY') | sum %}
+                    <td><a href="{{url_for('product.get_product',barcode=pro.BarCode)}}">{{pro.Name}}</a></td>
+                    <td>{{pro.Safety_quantity}}</td>
+                    <td>{{available_QTY}}</td>
+                    {%endfor%}
+                </tr>
+            </table>
+
+
+        </div>
+        <div class="card-bottom"></div>
+    </div>
+    
+</div>
+{% endif %}
+
 <div class="grid">
     <div class="card">
         <div class="card-header">Sales,Inventory and Inventory Turnover</div>

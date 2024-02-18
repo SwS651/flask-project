@@ -19,9 +19,29 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from app.plotly_graphs import *
 
+def check_inventory():
+    products_below_safety = Product.query.filter(Product.Safety_quantity > Product.Inventories.any(Inventory.Available_QTY)).all()
+    print(products_below_safety)
+    return products_below_safety
+
+# Define an event listener to update product status when inventory quantity changes
+@db.event.listens_for(db.Session, 'before_flush')
+def update_product_status(session, flush_context, instances):
+    for instance in session.dirty:
+        if isinstance(instance, Inventory):
+            # Check if the total quantity summed across all inventories becomes 0
+            total_quantity = sum(inv.Available_QTY for inv in instance.product.Inventories)
+            if total_quantity == 0:
+                instance.product.Status = 'OutOfStock'
+        elif isinstance(instance, Product):
+            # If the user manually sets the product status to 'InStock', automatically change it to 'OutOfStock'
+            if instance.Status == 'InStock':
+                instance.Status = 'OutOfStock'
+
 def create_app(config_class = Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.config['SECRET_KEY'] = 'smart_key_fyp_project'
     #Initialize Flask extensions here
     from app.extensions import init_extensions
     init_extensions(app)  
@@ -65,7 +85,7 @@ def create_app(config_class = Config):
         vertical_product_bar = show_prodcut_vertical_bar()
         lost_cost_bar = show_product_lost_cost_bar()
 
-
+        print(check_inventory())
         # Convert the pie chart to JSON format
         product_proportion_pie = product_proportion.to_json()
         sales_graph = sales_graph.to_json()
@@ -80,8 +100,9 @@ def create_app(config_class = Config):
                                turnover_bar = turnover_bar,
                                vertical_product_bar=vertical_product_bar,
                                lost_cost_bar = lost_cost_bar,
+                               inventory_warning = check_inventory(),
                                product_count = product_count,sale_count = sale_count,total_supplier = total_supplier,total_staff = total_staff
-                               )
+        )
     
 
     
@@ -184,10 +205,11 @@ def all_Model_value_total():
                      'inventory_lost':inventory_lost,
                      'lost_cost':lost_cost
                      }
+    
     sale_count = {'total_sales':total_sales,
                   'total_monthly_profit': "%.2f" % total_monthly_profit,
                   'total_daily_sales':total_daily_sales,
-                  'total_daily_profit':  "%.2f" % total_daily_profit
+                  'total_daily_profit':  "%.2f" % total_daily_profit if total_daily_profit else 0
                   }
     return product_count,sale_count,total_supplier,total_staff
 

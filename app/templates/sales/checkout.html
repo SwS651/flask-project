@@ -84,22 +84,24 @@
             </div>
             <div class="form-container">
                 <h3>Payment</h3>
-                <form action="{{url_for('sale.finalize_checkout',id = sale.id)}}" method="post">
-                    <label for="type_payment">Type Payment</label>
-                    <input type="text" name="type_payment" placeholder="Cash, E-Wallet, Other..." value="Cash" autocomplete=False required>
-                    <label for="refer">No. Refer</label>
-                    <input type="text" name="no_refer" placeholder="0000 000 000" value="" autocomplete=False required>
-                   
-                    <label for="tax">Tax: <span id="tax"></span></label>
-                    <input type="number" name="tax" placeholder="tax" value="0" min="0.00" step="0.01" required>
-                    <p >subtotal: <span id="subtotal">{{sale.Total}}</span></p><br><br><br>
-                    <label for="discount">Discount</label>
-                    <input type="number" name="discount" placeholder="0%" value="0" min="0.00" step="0.01" required>
-                    <label for="Total">Total</label>
-                    <input type="number" name="total" placeholder="Total Amount" value="0" min="0.00" step="0.01" required>
-                    <label for="customPrice">Save Custom Total Price</label>
-                    <input type="checkbox" name="custom_price" id="" value="True"><br><br>
-                    <input type="submit" class="button success" value="End Payment">
+
+                <form method="post" action="{{url_for('sale.finalize_checkout',id = sale.id)}}">
+                    {{ form.hidden_tag() }}
+                    {{form.type_payment.label}}
+                    {{ form.type_payment(class="form-control",value="Cash") }}
+                    {{form.no_refer.label}}
+                    {{form.no_refer(class="form-control") }}
+                    <p>Subtotal: <span id="subtotal">{{ sale.Total }}</span></p><br><br><br>
+                    {{form.tax.label}}
+                    {{form.tax(class="form-control",value= 0) }}
+                    {{form.discount.label}}
+                    {{ form.discount(class="form-control",value=0) }}
+                    {{form.total.label}}
+                    {{form.total(class="form-control") }}
+                    {{form.custom_price.label}}
+                    {{form.custom_price(class="form-check-input") }}<br><br>
+                    {{form.submit.label}}
+                    {{form.submit(class="button success")}}
                 </form>
             </div>
         </div>
@@ -113,13 +115,16 @@
         document.addEventListener("DOMContentLoaded", function() {
             const taxInput = document.querySelector("input[name='tax']");
             const discountInput = document.querySelector("input[name='discount']");
-            const subtotal = parseFloat(document.getElementById('subtotal').innerText);
+            const subtotal = document.getElementById('subtotal');
             console.log(subtotal)
             // Function to calculate total amount
             function calculateTotal() {
                 const tax = parseFloat(taxInput.value);
+                stotal = parseFloat(subtotal.innerText);
+                console.log(stotal)
+                subtotal.innerText= stotal
                 const discount = parseFloat(discountInput.value);
-                const total = parseFloat((subtotal + (subtotal*(tax/100))) - (subtotal *(discount/100))).toFixed(2);
+                const total = parseFloat((stotal + (stotal*(tax/100))) - (stotal *(discount/100))).toFixed(2);
                 document.querySelector("input[name='total']").value = total;
             }
 

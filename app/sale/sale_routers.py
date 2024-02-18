@@ -6,6 +6,20 @@ from app.sale import bp
 from app.models.sale import Sale, Sale_Item
 from flask import render_template, request, redirect, url_for
 from app import db
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, DecimalField, BooleanField, SubmitField
+from wtforms.validators import InputRequired, NumberRange
+
+class PaymentForm(FlaskForm):
+    type_payment = StringField('Type Payment', validators=[InputRequired()], render_kw={"autocomplete": "off"})
+    no_refer = StringField('No. Refer', validators=[InputRequired()], render_kw={"autocomplete": "off"})
+    tax = DecimalField('Tax', validators=[InputRequired(), NumberRange(min=0)], places=2)
+    discount = DecimalField('Discount', validators=[InputRequired(), NumberRange(min=0)], places=2)
+    total = DecimalField('Total', validators=[InputRequired(), NumberRange(min=0)], places=2)
+    custom_price = BooleanField('Save Custom Total Price')
+    submit = SubmitField('End Payment')
+
 @bp.route('/', methods=['GET','POST'])
 def sales_index():
     sales, product_totals,staff_totals = get_Info()
@@ -25,7 +39,6 @@ def get_Info():
 
 @bp.route('/search')
 def search_sales():
-    print("yess")
     sales, product_totals,staff_totals = get_Info()
 
     start_date = request.args.get('start_date')
@@ -38,7 +51,6 @@ def search_sales():
     # Query database for records within the specified date range
     sales = Sale.query.filter(Sale.Date>=start_date,Sale.Date<=end_date).all()
         
-    print(sales)
     return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date)
 
 
@@ -70,32 +82,22 @@ def get_draft_sale():
 def show_checkout_page():
     products = Product.query.filter(Product.Status == "InStock").all()
     sale = get_draft_sale()
+    form = PaymentForm()
     if sale:
         sale.Staff_id = 1
         sale.Date = datetime.today()
         update_sale_Total(sale.id)
         db.session.commit()
 
-        total_inventory = [sum(inventory.Available_QTY for inventory in product.Inventories) for product in products]
+        # total_inventory = [sum(inventory.Available_QTY for inventory in product.Inventories) for product in products]
     else:
         sale = create_sale()
-    return render_template('sales/checkout.html',products=products,sale = sale)
+    return render_template('sales/checkout.html',products=products,sale = sale, form=form)
 
 @bp.route('/add',methods=["GET"])
 def add_sale_item():
     item_id = request.args.get("item",None)
     if item_id:
-
-        # query = db.session.query(Inventory)\
-        #              .join(Product)\
-        #              .filter(Inventory.Product_id == item_id, Inventory.Available_QTY > 0)\
-        #              .order_by(Inventory.StockInDate)\
-        #              .first()
-        
-        # if not query:
-        #     print("No inventory found for the given product ID.")
-        #     pass
-        
         inventory = Inventory.query.filter(Inventory.Product_id == item_id, Inventory.Available_QTY > 0)\
                                    .order_by(Inventory.StockInDate).first()
         if inventory:
@@ -158,14 +160,16 @@ def remove_sale_items(item):
 @bp.route('/<int:id>/checkout',methods=["GET","POST"])
 def finalize_checkout(id):
     sale =  Sale.query.get_or_404(id)
+    form = PaymentForm()
     update_sale_Total(sale.id)
-    if request.method == "POST":
-        tax = float(request.form["tax"])
-        discount = float(request.form["discount"])
-        no_refer = request.form["no_refer"]
-        type_payment = request.form["type_payment"]
-        if "custom_price" in request.form and request.form["custom_price"] == "True":
-            total = float(request.form["total"])
+    if form.validate_on_submit():
+        tax = float(form.tax.data)
+        discount = float(form.discount.data)
+        no_refer = form.no_refer.data
+        type_payment = form.type_payment.data
+        # if "custom_price" in request.form and request.form["custom_price"] == "True":
+        if form.custom_price.data:
+            total = float(form.total.data)
         else:  
             total = (sale.Total + (sale.Total*(tax/100))) - (sale.Total * (discount/100))
 

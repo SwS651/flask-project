@@ -12,16 +12,28 @@
 {% endblock %}
 {% block nav_staff %}active{% endblock %}
 {% block content %}
-<a href="{{url_for('staff.create_staff')}}" class="btn" >Add New</a> <br><br>
+
+{% for field, errors in form.errors.items() %}
+    <ul class="errors">
+        {% for error in errors %}
+        <li>{{field}}: {{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endfor %}
+
+
 <form action="{{url_for('utils.excel_upload',entity = "staff")}}" method="post" enctype = "multipart/form-data" >
     <input type = "file" name = "file"  />
     <input type="submit" name="upload_excel" value="IMPORT">
     <br><br>
 </form>
-<form action="" method="get">
-    <input type="text" name="search" placeholder="Search Field" required>
-    <button type="submit" class="button primary">Search</button>
-</form>
+<div class="flex flex-between-center">
+    <a href="{{url_for('staff.create_staff')}}" class="button success">Create</a>
+    <form action="{{url_for('staff.search_staff')}}" method="get" class="flex flex-start-center">
+        <input type="text" name="search" style="display: inline-block; margin: 0 10px 0 0;" placeholder="Search Field" required>
+        <button type="submit" class="button primary">Search</button>
+    </form>
+</div>
 <div class="table-container maxheight-800 scrollable">
     <table >
         <thead>
@@ -36,26 +48,26 @@
         <tbody>
             {% for staff in staffs %}
             <tr>
-                <form method="POST" action="{{ url_for('staff.edit_staff', id=staff.id) }}" style="display: inline-block;">
+                <form method="POST" action="{{ url_for('staff.quick_edit', id=staff.id) }}" style="display: inline-block;">
+                    {{ form.csrf_token }}
                 <td>
                     <span><a href="{{url_for('staff.get_staff',id = staff.id)}}">{{ staff.id}}</a></span>
-                    <input type="text" style="display: none;" name="staff_id" id="staff_id" value="{{staff.id}}" required>
+                    {{form.id(value=staff.id,style="display:none")}}
                 </td>      
                 <td>
                     <span><a href="{{url_for('staff.get_staff',id = staff.id)}}">{{ staff.Name}}</a></span>
-                    <input type="text" style="display: none;" name="staff_name" id="staff_name" value="{{staff.Name}}" required>
+                    {{form.name(value=staff.Name,style="display:none")}}
                 </td>      
                 <td>
                     <span>{{ staff.Email}}</span>
-                    <input type="email" style="display: none;" name="staff_email" id="staff_name" value="{{staff.Email}}" required>
+                    {{form.email(value=staff.Email,style="display:none")}}
     
                 </td>      
     
                 <td>
                     <!-- <span>{{ staff.Role}}</span> -->
-                    
-                    <input type="radio" name="role" id="admin" value="admin" {% if staff.Role == 'admin' %} checked {% endif %} disabled><label for="admin">admin</label>
-                    <input type="radio" name="role" id="staff" value="staff" {% if staff.Role == 'staff' %} checked {% endif %} disabled><label for="staff">staff</label>
+                    {{staff.Role}}
+
                 </td>    
                 
                 <td>
@@ -78,39 +90,9 @@
 
 
 
-<script type="text/javascript">
-    var btnEdits = document.querySelectorAll('#edit');
-    var btnCancels = document.querySelectorAll('#cancel');
-    btnEdits.forEach((btnEdit)=>{
-        btnEdit.addEventListener('click',editable);
-    })
-    
-    btnCancels.forEach((btnCancel)=>{
-        btnCancel.addEventListener('click',editable)
-    })
 
-    function editable(event) {
-        var row = event.target.closest('tr');
-            var inputElements = row.querySelectorAll('input:not([type=radio])');
-            var spanElements = row.querySelectorAll('span');
-            var radioElements = row.querySelectorAll('input[type="radio"]');
-            inputElements.forEach((inputElement) => {
-                inputElement.style.display = (inputElement.style.display === 'none') ? 'inline-block' : 'none';
-            });
+{% endblock %}
 
-            spanElements.forEach((spanElement) => {
-                spanElement.style.display = (spanElement.style.display === 'none') ? 'inline-block' : 'none';
-            });
-
-            radioElements.forEach((radioElement) => {
-                radioElement.disabled = (radioElement.disabled === true) ? false : true;
-            });
-             // Toggle the display of the edit, update, and cancel links
-            row.querySelector('#edit').style.display = (row.querySelector('#edit').style.display === 'none') ? 'inline-block' : 'none';
-            row.querySelector('#update').style.display = (row.querySelector('#update').style.display === 'none') ? 'inline-block' : 'none';
-            row.querySelector('#cancel').style.display = (row.querySelector('#cancel').style.display === 'none') ? 'inline-block' : 'none';
-            row.querySelector('#delete').style.display = (row.querySelector('#delete').style.display === 'none') ? 'inline-block' : 'none';
-    }
-</script>
-
+{% block jscontent %}
+<script src="{{url_for('static',filename='/js/tablefield_editable.js')}}"></script>
 {% endblock %}

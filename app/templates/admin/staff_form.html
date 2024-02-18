@@ -1,42 +1,163 @@
 {% extends 'base.html' %}
 {% block nav_staff %}active{% endblock %}
 
-{% block css_style %} 
-    <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
+{% block css_style %}
+<link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='css/flex.css')}}">
 {% endblock %}
 {% block content %}
+{% if action == 'add' %}
 <div class="form-container">
-    <h3>Staff</h3>
-    <form action="{{url_for('staff.create_staff')}}" method="post">
-        <!-- ID (You might want to generate this automatically in the backend) -->
-        <label for="staff_id">StaffID:</label>
-        <input type="text" id="staff_id" name="staff_id" {% if staff %} value="{{staff.id}}" {% endif %} required><br>
-        
-        <!-- Username -->
-        <label for="staff_name">Username:</label>
-        <input type="text" id="staff_name" name="staff_name" {% if staff %} value="{{staff.Name}}" {% endif %} required><br>
+    <h3>Add Staff</h3>
+    <form method="post" action="{{url_for('staff.create_staff')}}">
+        {{ form.csrf_token }}
+        <!-- Or form.hidden_tag() -->
 
-        <!-- Email -->
-        <label for="staff_email">Email:</label>
-        <input type="email" id="staff_email" name="staff_email" {% if staff %} value="{{staff.Email}}" {% endif %} required><br>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" {% if staff %} value="{{staff.Password}}" {% endif %} required><br>
-
-        <label for="role">Role</label>
-        <select name="role" id="">
-            <option value="admin" {% if staff and staff.Role == "admin" %} selected {% endif %}>Admin</option>
-            <option value="staff" {% if staff and staff.Role == "staff" %} selected {% endif %}>Staff</option>
-        </select>
-        <br>
-        
-        {% if error %}
-            <p class="error" style="color:red;"><strong>Error:</strong> {{ error }}</p>
-        {% endif %}
+        <div>
+            {{ form.name.label }}
+            {{ form.name() }}
             
-            
-        <!-- Submit Button -->
-        <button type="submit" class="button primary">Register</button>
+            {% for error in form.name.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.email.label }}
+            {{ form.email() }}
+            {% for error in form.email.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.password.label }}
+            {{ form.password()}}
+
+
+            {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password()}}
+            {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.role.label }}
+
+            <select name="role" id="role">
+                {% for choice_key, choice_label in form.role.choices %}
+                    <option value="{{ choice_key }}"  {% if choice_key == "staff" %}selected{% endif %}>{{ choice_label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            {{ form.auto_generate_id }} {{ form.auto_generate_id.label }}
+        </div>
+        <div>
+
+            {{ form.id.label }}
+
+            {{ form.id(value=form.id.data, disabled=true) }}
+
+            {% for error in form.id.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            <button class="button success" type="submit">{% if action == 'add' %}Add{% else %}Update{% endif %}</button>
+        </div>
     </form>
 </div>
+
+{% endif %}
+{% if action == 'edit' %}
+<div class="form-container">
+    <h3>Edit Staff</h3>
+    <form method="post" action="{{url_for('staff.get_staff',id = staff.id)}}">
+        {{ form.csrf_token }}
+        <!-- Or form.hidden_tag() -->
+
+        <div>
+            {{ form.name.label }}
+            {{ form.name(value=staff.Name) }}
+            {% for error in form.name.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.email.label }}
+            {{ form.email(value=staff.Email) }}
+            {% for error in form.email.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.password.label }}
+            {{ form.password(value=staff.Password) }}
+
+            {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password()}}
+            {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.role.label }}
+
+            <select name="role" id="role">
+                {% for choice_key, choice_label in form.role.choices %}
+                {% if staff and staff.Role == choice_key %}
+                <option value="{{ choice_key }}" selected>{{ choice_label }}</option>
+                {% else %}
+                <option value="{{ choice_key }}">{{ choice_label }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+
+            {{ form.id.label }}
+            {{ form.id(value=form.id.data) }}
+
+            {% for error in form.id.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            <button class="button info" type="submit">Update</button>
+        </div>
+    </form>
+</div>
+
+{% endif %}
+
+
+{% endblock %}
+
+
+
+
+
+
+{% block jscontent %}
+<script>
+
+    var chk_autoid = document.getElementById('auto_generate_id')
+
+    chk_autoid.addEventListener('change', () => {
+        var field_id = document.getElementById('id')
+        if (chk_autoid.checked)
+            field_id.disabled = true
+        else
+            field_id.disabled = false
+    })
+</script>
 {% endblock %}

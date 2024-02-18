@@ -1,15 +1,29 @@
 
-import pandas
-import sqlalchemy
 from app.models.category import Category
 from app.models.supplier import Supplier
 from app.product import bp
 from flask import flash, render_template, request, redirect, url_for
-from app.models.product import Product,product_category
+from app.models.product import Product
 from app import db
 
-# from app.utils.import_.import_utils import *
+from flask_wtf import FlaskForm
+from wtforms import BooleanField, IntegerField, SelectField, SelectMultipleField, StringField, ValidationError
+from wtforms.validators import InputRequired,Optional
 
+from app.product.inventory_routers import InventoryForm
+
+
+class CreateProductForm(FlaskForm):
+    name = StringField('Name', validators=[InputRequired()])
+    barcode = IntegerField('BarCode', validators=[InputRequired()])
+    safety_quantity_custom = BooleanField('Custom Set Line')
+    safety_quantity = IntegerField('Safety Quantity', validators=[Optional()])
+    status = SelectField('Status', choices=[('NotAvailable', 'Not Available'), ('OutOfStock', 'Out of Stock'), ('InStock', 'In Stock')], default='NotAvailable')
+    categories = SelectMultipleField('Categories', choices=[], coerce=int)
+
+    def __init__(self, *args, **kwargs):
+        super(CreateProductForm, self).__init__(*args, **kwargs)
+        self.categories.choices = [(category.id, category.Name) for category in Category.query.all()]
 
 @bp.route('/',methods=["GET"])
 def index():
@@ -17,6 +31,9 @@ def index():
     per_page = request.args.get('per_page', 10, type=int)
     query = request.args.get('query','')
 
+    form = CreateProductForm()
+    categories = Category.query.all()
+    # form.set_category_choices(categories)
     if query:
         products = Product.query.filter(
             db.or_(Product.BarCode.ilike(f'%{query}%'), Product.Name.ilike(f'%{query}%'))
@@ -26,7 +43,7 @@ def index():
 
     categories = Category.query.all()
     
-    return render_template('product/product.html', products=products,categories=categories)
+    return render_template('product/product.html', products=products,categories=categories,form=form)
 
 
 @bp.route('/category/<category_name>')
@@ -35,10 +52,11 @@ def products_by_category(category_name):
     category = Category.query.filter_by(Name=category_name).first()
     column_names = Product.metadata.tables['product'].columns.keys()
     categories = Category.query.all()
+    form = CreateProductForm()
     if category:
         # If the category exists, retrieve all products associated with it
         products = category.products
-        return render_template('product/product.html', products=products, column_names=column_names,categories=categories)
+        return render_template('product/product.html', products=products, column_names=column_names,categories=categories,form=form)
     else:
         # If the category does not exist, return an error message or handle it as you wish
         return "Category not found", 404
@@ -46,12 +64,18 @@ def products_by_category(category_name):
 
 @bp.route('/<barcode>/', methods=['GET'])
 def get_product(barcode):
+
     if barcode:
         product = db.one_or_404(db.select(Product).filter_by(BarCode=barcode))
         suppliers = Supplier.query.all()
         inventories = product.Inventories
         categories = Category.query.all()
-        return render_template('product/detail.html', product=product,categories = categories,inventories = inventories,suppliers=suppliers)
+        form = CreateProductForm(obj=product)
+        form.categories.choices = [(category.id, category.Name) for category in Category.query.all()]
+
+        inventoryForm = InventoryForm()
+        inventoryForm.supplier.choices = [(supplier.id,supplier.Name) for supplier in suppliers]
+        return render_template('product/detail.html', product=product,categories = categories,inventories = inventories,suppliers=suppliers,form = form,inventoryForm=inventoryForm)
 
     else:
         return redirect(url_for('product.index'))
@@ -59,23 +83,19 @@ def get_product(barcode):
 
 @bp.route('/search/', methods=['GET'])
 def search_product():
-
+    categories = Category.query.all()
+    products = Product.query.all()
     query = request.args.get('query','')
-    
+    form = CreateProductForm()
     if not query:
-        # Handle case when the query parameter is not provided
         return redirect(url_for('product.index'))
     
     products = Product.query.filter(
         db.or_(Product.BarCode.ilike(f'%{query}%'), Product.Name.ilike(f'%{query}%'))
     ).all()
+    
 
-    categories = Category.query.all()
-    # Perform a search using an OR condition for barcode and product name
-    # search_results = db.session.query(Product).filter(sqlalchemy.or_(str(Product.BarCode).upper() == query.upper(), (Product.Name).upper() == query.upper())).all()
-
-
-    return render_template('product/product.html', products=products, categories=categories)
+    return render_template('product/product.html',  products=products,categories=categories,form=form)
 
 
 
@@ -83,58 +103,57 @@ def search_product():
     
 @bp.route('/create', methods=['GET', 'POST'])
 def create_product():
-    if request.method == 'POST':
-        barcode = request.form['barcode']
-        name = request.form['name']
-        category_name = request.form['category']
+    form = CreateProductForm()
+    categories = Category.query.all()
+    # form.set_category_choices(categories)
 
 
-        category = Category.query.filter(Category.Name == category_name).first()
-        if not category:
-            category = Category(Name=category_name)
-            db.session.add(category)
-
+    if form.validate_on_submit():
+        name = form.name.data
+        barcode = form.barcode.data
+        safety_quantity = form.safety_quantity.data if form.safety_quantity_custom.data else -1
+        status = form.status.data
+        
         new_product = Product(
-            BarCode=barcode,
-            Name=name,
-            Safety_quantity = -1,
-            Status = "NotAvailable"
+            Name=name, 
+            BarCode=barcode, 
+            Safety_quantity=safety_quantity, 
+            Status=status
         )
         
-        new_product.Categories.append(category)
+        # Add categories to the product
+        for category_id in form.categories.data:
+            category = Category.query.get(category_id)
+            if category:
+                new_product.Categories.append(category)
 
         
         db.session.add(new_product)
         db.session.commit()
+        flash('Product created successfully!', 'success')
 
         return redirect(url_for('product.index'))
-    categories = Category.query.all()
-    return render_template('product/form.html',categories = categories)
+
+    return render_template('product/product.html',products = Product.query.all(),categories = categories,form = form)
 
     
 @bp.route('/quick_edit/<barcode>', methods=['GET', 'POST'])
 def quick_edit(barcode):
-    product = db.one_or_404(db.select(Product).filter_by(BarCode=barcode))
-
-    if request.method == 'POST':
-        # Update data from the form
-        product.BarCode = request.form['barcode'] if request.form['barcode'] else product.BarCode
-        product.Name = request.form['name'] if request.form['barcode'] else product.Name
-        product.Category = request.form['category'] if request.form['barcode'] else product.Category
-        product.Quantity = request.form['quantity'] if request.form['barcode'] else product.Quantity
-        product.RetailPrice = request.form['retail_price'] if request.form['barcode'] else product.RetailPrice
-
+    # product = db.one_or_404(db.select(Product).filter_by(BarCode=barcode))
+    product = Product.query.filter_by(BarCode=barcode).first_or_404()
+    form = CreateProductForm(obj = product)
+    if form.validate_on_submit():
+        product.BarCode = form.barcode.data
+        product.Name = form.name.data
+        product.Safety_quantity = form.safety_quantity.data
         try:
             # Commit changes to the database
             db.session.commit()
-            
         except Exception as e:
             db.session.rollback()
-            
-    return render_template(url_for('product.index'))
-
-
-    # return render_template('product/detail.html', product=product,categories = categories,inventories = inventories)
+        return redirect(url_for('product.index'))
+    
+    return render_template('product/product.html',products = Product.query.all(),categories = Category.query.all(),form = form)
 
 
 
@@ -143,41 +162,35 @@ def edit_product(barcode):
     product = Product.query.filter_by(BarCode=barcode).first_or_404()
     categories = Category.query.all()
     suppliers = Supplier.query.all()
+    form = CreateProductForm(obj=product)
+    form.categories.choices = [(category.id, category.Name) for category in Category.query.all()]
 
     if request.method == 'POST':
         if "save_category" in request.form:
             product.Categories.clear()
-            category_ids = request.form.getlist('category_ids')
-            for cat in category_ids:
-                product.Categories.append(Category.query.filter(Category.Name == cat).first())
-
+            for category_id in form.categories.data:
+                product.Categories.append(Category.query.filter(Category.id == category_id).first())
+            
         else:
-            # Update data from the form
-            # product.BarCode = request.form['barcode'] if request.form['barcode'] else product.BarCode
-            # product.Name = request.form['name'] if request.form['barcode'] else product.Name
-            # product.Safety_quantity = request.form['safety_quantity'] if request.form['barcode'] else product.Safety_quantity
-            # product.Status = request.form['status'] if request.form['status'] else product.Status
-            product.BarCode = request.form.get('barcode', product.BarCode)
-            product.Name = request.form.get('name', product.Name)
-            product.Safety_quantity = request.form.get('safety_quantity', product.Safety_quantity)
-            product.Status = request.form.get('status', product.Status)
+            product.BarCode = form.barcode.data
+            product.Name = form.name.data
+            product.Safety_quantity = form.safety_quantity.data if form.safety_quantity_custom.data and form.safety_quantity.data else -1
+            product.Status = form.status.data if form.status.data else product.Status
+
         try:
             db.session.commit()
-            return redirect(url_for('product.edit_product',barcode=product.BarCode))
+            return redirect(url_for('product.get_product',barcode=product.BarCode))
         except Exception as e:
             db.session.rollback()
-            # return render_template('product/detail.html', product=product, error_message="Barcode already exists.")
             flash("Error occurred while updating the product.", "error")
 
-    return render_template('product/detail.html', product=product,categories = categories, suppliers = suppliers )
+    return render_template('product/detail.html', product=product,categories = categories, suppliers = suppliers ,form=form)
 
 
-@bp.route('/product/<int:id>/delete', methods=['POST'])
+@bp.route('/product/<int:id>/delete')
 def delete_product(id):
     product = Product.query.get_or_404(id)
-
     product.delete()
-
     return redirect(url_for('product.index'))
 
 
