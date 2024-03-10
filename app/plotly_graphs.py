@@ -6,6 +6,8 @@ from app.models.sale import Sale, Sale_Item
 
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+
+
 # For Turnover Graph
 def calculate_inventory_turnover(product):
     # Get all sales for the product
@@ -58,6 +60,8 @@ def get_total_product_available_qty():
         total_quantities.append(total_quantity)
     return product_names,total_quantities
 
+
+#Lost Cost Graphs
 def show_product_lost_cost_bar():
     # Create plotly visualization for lost cost by product
     lost_cost_by_product = db.session.query(Product.Name, db.func.sum(Inventory.CostPerItem * Inventory.Lost_QTY).label('total_lost_cost')) \
@@ -76,9 +80,8 @@ def show_product_lost_cost_bar():
     )
     return lost_cost_chart
 
-
+#Proportion of products Graphs
 def show_product_proportion_pie(): 
-    
     product_names, quantities = get_total_product_available_qty()
     
     # Create a Plotly pie chart
@@ -89,18 +92,18 @@ def show_product_proportion_pie():
 
     return product_proportion_pie
 
-
+#Sales Statistic
 def show_sales_graph():
     sales = Sale.query.all()
     dates = [str(datetime.strftime(sale.Date,'%Y-%m-%d')) for sale in sales]
     total_sales = [sale.Total for sale in sales]
     sales_graph = go.Figure()
     sales_graph.add_trace(go.Scatter(x=dates, y=total_sales, mode='lines', name='Total Sales'))
-    sales_graph.update_layout( xaxis_title='Date', yaxis_title='Sales')
+    sales_graph.update_layout( xaxis_title='Date', yaxis_title='Sales (RM)')
 
     return sales_graph
 
-
+# Sales, Inventory and Inventory Turnover Graphs
 def show_inventory_turnover_graph():
     # turnover_rate = {product.Name: calculate_inventory_turnover(product.id) for product in products}
     products = Product.query.all()
@@ -134,6 +137,7 @@ def show_inventory_turnover_graph():
     return turnover_bar_figure
 
 
+# Inventory Value by Products Graph
 def show_prodcut_vertical_bar():
     product_names, quantities = get_total_product_available_qty()
     vertical_product_bar = go.Figure(go.Bar(

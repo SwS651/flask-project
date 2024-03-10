@@ -25,23 +25,24 @@ def check_inventory():
     return products_below_safety
 
 # Define an event listener to update product status when inventory quantity changes
-@db.event.listens_for(db.Session, 'before_flush')
-def update_product_status(session, flush_context, instances):
-    for instance in session.dirty:
-        if isinstance(instance, Inventory):
-            # Check if the total quantity summed across all inventories becomes 0
-            total_quantity = sum(inv.Available_QTY for inv in instance.product.Inventories)
-            if total_quantity == 0:
-                instance.product.Status = 'OutOfStock'
-        elif isinstance(instance, Product):
-            # If the user manually sets the product status to 'InStock', automatically change it to 'OutOfStock'
-            if instance.Status == 'InStock':
-                instance.Status = 'OutOfStock'
+# @db.event.listens_for(db.Session, 'before_flush')
+# def update_product_status(session, flush_context, instances):
+#     for instance in session.dirty:
+#         if isinstance(instance, Inventory):
+#             # Check if the total quantity summed across all inventories becomes 0
+#             total_quantity = sum(inv.Available_QTY for inv in instance.product.Inventories)
+#             if total_quantity == 0:
+#                 instance.product.Status = 'OutOfStock'
+#         elif isinstance(instance, Product):
+#             # If the user manually sets the product status to 'InStock', automatically change it to 'OutOfStock'
+#             if instance.Status == 'InStock':
+#                 instance.Status = 'OutOfStock'
 
 def create_app(config_class = Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    app.config['SECRET_KEY'] = 'smart_key_fyp_project'
+    app.config['SECRET_KEY'] = 'your_secret_key_here'
+    # app.config['SECRET_KEY'] = 'smart_key_fyp_project'
     #Initialize Flask extensions here
     from app.extensions import init_extensions
     init_extensions(app)  
@@ -207,7 +208,7 @@ def all_Model_value_total():
                      }
     
     sale_count = {'total_sales':total_sales,
-                  'total_monthly_profit': "%.2f" % total_monthly_profit,
+                  'total_monthly_profit': "%.2f" % total_monthly_profit if total_monthly_profit else 0,
                   'total_daily_sales':total_daily_sales,
                   'total_daily_profit':  "%.2f" % total_daily_profit if total_daily_profit else 0
                   }
