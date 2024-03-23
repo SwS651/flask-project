@@ -2,7 +2,7 @@ from app.extensions import db
 
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    Staff_id = db.Column(db.String, db.ForeignKey('staff.id'), nullable=False)
+    Staff_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     Date = db.Column(db.Date, nullable=False)
     Tax = db.Column(db.Float, nullable=True)
     Discount = db.Column(db.Float, nullable=True)

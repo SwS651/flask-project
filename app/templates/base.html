@@ -35,25 +35,19 @@
                     <div class="menu">
                         <ul class="menu-links">
                             <li class="menu-link {% block nav_dashboard %}{% endblock %}"><i class='nav-icon bx bx-home'></i><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                            <li class="menu-link {% block nav_staff %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('staff.index') }}">Staff</a></li>
+                            <li class="menu-link {% block nav_staff %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('user.index') }}">Staff</a></li>
                             <li class="menu-link {% block nav_inventory %}{% endblock %}"><i class='nav-icon bx bxs-package'></i><a href="{{ url_for('product.index') }}">Products</a></li>
                             <li class="menu-link {% block nav_category %}{% endblock %}"><i class='nav-icon bx bxs-category' ></i><a href="{{ url_for('category.index') }}">Category</a></li>
                             <li class="menu-link {% block nav_supplier %}{% endblock %}"><i class='nav-icon bx bxs-buildings' ></i><a href="{{ url_for('supplier.index') }}">Supplier</a></li>
                             <li class="menu-link {% block nav_report %}{% endblock %}"><i class='nav-icon bx bx-line-chart' ></i><a href="{{ url_for('sale.sales_index') }}">Sales</a></li>
                             <li class="menu-link {% block nav_checkout %}{% endblock %}"><i class='nav-icon bx bx-dollar-circle' ></i><a href="{{ url_for('sale.show_checkout_page') }}">Check Out</a></li>
+                            <li class="menu-link {% block nav_cashflow %}{% endblock %}"><i class='nav-icon bx bx-book-content'></i><a href="">Cash Flow</a></li>
+                            <li class="menu-link {% block nav_ImExport %}{% endblock %}"><i class='nav-icon bx bx-transfer'></i><a href="{{url_for('main.imexport_overview')}}">Import & Export</a></li>
+                            <li class="menu-link {% block nav_profile %}{% endblock %}"><i class='nav-icon bx bx-user-circle'></i><a href="{{url_for('user.get_staff',id=current_user.id)}}">Profile</a></li>
                         </ul>
                     </div>
                     <div class="bottom-content">
-                        
-                        <div>
-                            <i class='nav-icon bx bxs-moon' ></i>
-                            <span>Helloworld</span> 
-                        </div>
-                        <div class="toggle-switch">
-                            <span class="switch"></span>
-                        </div>
-                            
-                        
+                        <li class="menu-link"><i class='nav-icon bx bx-user-logout'></i><a href="{{url_for('auth.logout')}}">Logout</a></li>
                     </div>
                 </div>
                 

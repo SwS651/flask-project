@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block nav_ImExport %}active{% endblock %}
+{% block css_style %}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename='css/flex.css')}}"> 
+    <style>
+
+
+        .custom-box{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: var(--text-color);
+            padding: 20px;
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .custom-box:hover{
+            background-color: #727272dc;
+            color: #ffffff;
+            transition: all 0.5s;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+
+
+<h3> -- Import -- </h3>
+<br>
+<div class="flex flex-item-center" style="margin-bottom: 30px;">
+    <a class="custom-box" href="">Product</a>
+    <a class="custom-box" href="">Inventory</a>
+    <a class="custom-box" href="">Staff</a>
+    <a class="custom-box" href="">Supplier</a>
+    <a class="custom-box" href="">Cash Flow</a>
+</div>
+
+
+<h3> -- Export -- </h3>
+<br>
+<div class="flex flex-item-center" style="margin-bottom: 30px;">
+    <a class="custom-box" href="{{url_for("main.inventory_report")}}">Inventory</a>
+    <a class="custom-box" href="{{url_for("main.sales_report")}}">Sales Report</a>
+    <a class="custom-box" href="">Cash Flow</a>
+</div>
+
+{% endblock %}

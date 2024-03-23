@@ -4,7 +4,7 @@ import sqlalchemy
 from app.stock import bp
 from flask import render_template, request, redirect, url_for
 from app.models.stock import Stock
-from app.models.staff import Staff
+from app.models.user import Staff
 from app import db
 from datetime import date, datetime
 from pandas.api.types import is_datetime64_any_dtype as is_datetime

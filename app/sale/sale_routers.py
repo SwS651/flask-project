@@ -1,7 +1,9 @@
 from datetime import datetime,date, timedelta
 
+from flask_login import current_user, login_required
+
 from app.models.product import Product,Inventory
-from app.models.staff import Staff
+from app.models.user import User
 from app.sale import bp
 from app.models.sale import Sale, Sale_Item
 from flask import render_template, request, redirect, url_for
@@ -13,7 +15,7 @@ from wtforms.validators import InputRequired, NumberRange
 
 class PaymentForm(FlaskForm):
     type_payment = StringField('Type Payment', validators=[InputRequired()], render_kw={"autocomplete": "off"})
-    no_refer = StringField('No. Refer', validators=[InputRequired()], render_kw={"autocomplete": "off"})
+    no_refer = StringField('No. Refer', validators=[], render_kw={"autocomplete": "off"})
     tax = DecimalField('Tax', validators=[InputRequired(), NumberRange(min=0)], places=2)
     discount = DecimalField('Discount', validators=[InputRequired(), NumberRange(min=0)], places=2)
     total = DecimalField('Total', validators=[InputRequired(), NumberRange(min=0)], places=2)
@@ -30,8 +32,8 @@ def get_Info():
     sales = Sale.query.order_by(Sale.Status).all()
     product_query_totals = db.session.query(Product.Name,db.func.sum(Sale_Item.Quantity).label("Quantity")).filter(Sale.Date == date.today(),Sale.id == Sale_Item.Report_id,Sale.Status == "paid",Inventory.Product_id == Product.id,Inventory.id == Sale_Item.Inventory_id).group_by(Product.Name).all()
     # today_records = Sale.query.filter(Sale.Date == date.today()).all()
-    staff_query_totals = db.session.query(Sale.Staff_id,Staff.Name,db.func.sum(Sale.Total).label("Total_Amount"))\
-                            .filter(Sale.Date == date.today(),Staff.id == Sale.Staff_id)\
+    staff_query_totals = db.session.query(Sale.Staff_id,(User.Last_Name + ' ' + User.First_Name).label('Name'),db.func.sum(Sale.Total).label("Total_Amount"))\
+                            .filter(Sale.Date == date.today(),User.id == Sale.Staff_id)\
                             .group_by(Sale.Staff_id)\
                             .all()
 
@@ -58,7 +60,7 @@ def search_sales():
 
 def create_sale():
     sale = Sale(
-        Staff_id=1, 
+        Staff_id=current_user.id, 
         Date = datetime.today(), 
         Tax = 0,
         Discount = 0, 
@@ -79,12 +81,14 @@ def get_draft_sale():
     return Sale.query.filter(Sale.Status == "draft").first()
 
 @bp.route('/checkout/', methods=['GET','POST'])
+@login_required
 def show_checkout_page():
     products = Product.query.filter(Product.Status == "InStock").all()
     sale = get_draft_sale()
     form = PaymentForm()
     if sale:
-        sale.Staff_id = 1
+        user = User.query.filter(User.id == current_user.id).first()
+        sale.Staff_id = current_user.id
         sale.Date = datetime.today()
         update_sale_Total(sale.id)
         db.session.commit()
@@ -92,7 +96,7 @@ def show_checkout_page():
         # total_inventory = [sum(inventory.Available_QTY for inventory in product.Inventories) for product in products]
     else:
         sale = create_sale()
-    return render_template('sales/checkout.html',products=products,sale = sale, form=form)
+    return render_template('sales/checkout.html',products=products,sale = sale, form=form,username=user.Last_Name + '' + user.First_Name)
 
 @bp.route('/add',methods=["GET"])
 def add_sale_item():
@@ -158,6 +162,7 @@ def remove_sale_items(item):
     
 
 @bp.route('/<int:id>/checkout',methods=["GET","POST"])
+@login_required
 def finalize_checkout(id):
     sale =  Sale.query.get_or_404(id)
     form = PaymentForm()
@@ -204,6 +209,7 @@ def update_sale_Total(id):
 
 
 @bp.route('/detail',methods=['GET'])
+@login_required
 def get_sale_detail():
     id = request.args.get('id')
     sale = Sale.query.get_or_404(id)

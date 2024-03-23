@@ -1,6 +1,7 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from statistics import mean
 from flask import Flask, render_template, request, redirect, url_for
+from flask_login import current_user, login_required
 from sqlalchemy import extract
 
 from config import Config
@@ -8,35 +9,19 @@ from app.extensions import db
 
 from app.models.supplier import Supplier
 from app.models.category import Category
-from app.models.staff import Staff
+from app.models.user import User
 from app.models.product import Product,Inventory
 from app.models.supplier import Supplier
-
-# from app.models.dailysalesreport import DailySalesReport,Sale
 from app.models.sale import Sale,Sale_Item
 
-import plotly.graph_objs as go
-from plotly.subplots import make_subplots
 from app.plotly_graphs import *
-
+from flask_principal import UserNeed,RoleNeed,identity_loaded
 def check_inventory():
     products_below_safety = Product.query.filter(Product.Safety_quantity > Product.Inventories.any(Inventory.Available_QTY)).all()
     print(products_below_safety)
     return products_below_safety
 
-# Define an event listener to update product status when inventory quantity changes
-# @db.event.listens_for(db.Session, 'before_flush')
-# def update_product_status(session, flush_context, instances):
-#     for instance in session.dirty:
-#         if isinstance(instance, Inventory):
-#             # Check if the total quantity summed across all inventories becomes 0
-#             total_quantity = sum(inv.Available_QTY for inv in instance.product.Inventories)
-#             if total_quantity == 0:
-#                 instance.product.Status = 'OutOfStock'
-#         elif isinstance(instance, Product):
-#             # If the user manually sets the product status to 'InStock', automatically change it to 'OutOfStock'
-#             if instance.Status == 'InStock':
-#                 instance.Status = 'OutOfStock'
+
 
 def create_app(config_class = Config):
     app = Flask(__name__)
@@ -48,8 +33,8 @@ def create_app(config_class = Config):
     init_extensions(app)  
     # Register blueprints her
 
-    # from app.supplier import bp as supplier_bp
-    # app.register_blueprint(category_bp,url_prefix='/suppliers')
+    from app.main import main as main_bp
+    app.register_blueprint(main_bp)
 
     from app.category import bp as category_bp
     app.register_blueprint(category_bp,url_prefix='/category')
@@ -57,8 +42,8 @@ def create_app(config_class = Config):
     from app.product import bp as product_bp
     app.register_blueprint(product_bp, url_prefix='/products')
 
-    from app.staff import bp as staff_bp
-    app.register_blueprint(staff_bp, url_prefix='/staff')
+    from app.user import bp as user_bp
+    app.register_blueprint(user_bp, url_prefix='/staff')
     
     from app.utils import bp as utils_bp
     app.register_blueprint(utils_bp, url_prefix='/utils')
@@ -70,9 +55,12 @@ def create_app(config_class = Config):
     from app.supplier import bp as supplier_bp
     app.register_blueprint(supplier_bp, url_prefix='/suppliers')
 
+    from app.auth import auth as auth_bp
+    app.register_blueprint(auth_bp)
     
         
     @app.route('/')
+    @login_required
     def dashboard():
         # inventories = Inventory.query.all()
         # categories = Category.query.all()
@@ -142,27 +130,28 @@ def create_app(config_class = Config):
 
         return redirect(url_for('/'))
     
-    @app.route('/login',methods=['GET','POST'])
-    def login():
-        info_message = ""
-            
-        if request.method == "POST":
-            # users = db.session.execute(db.select(User).order_by(User.StaffName)).scalars()
-            user = db.session.execute(db.select(Staff).filter_by(StaffEmail=request.form["email"],Password=request.form["password"])).scalar()
-            if not user:
-                info_message = "Invalid Email or Password!"
-            else:
-                
-                return redirect(url_for('dashboard'))
-            
-        return render_template("login/login.html", info_message = info_message)
+
+    @identity_loaded.connect_via(app)
+    def on_identity_loaded(sender, identity):
+        # Set the identity user object
+        identity.user = current_user
+
+        # Add the UserNeed to the identity
+        if hasattr(current_user, 'id'):
+            identity.provides.add(UserNeed(current_user.id))
+
+        # Assuming the User model has a list of roles, update the
+        # identity with the roles that the user provides
+        if hasattr(current_user, 'roles'):
+            for role in current_user.roles:
+                identity.provides.add(RoleNeed(role.name))
 
 
     return app
 
 def all_Model_value_total():
     total_supplier = Supplier.query.count()
-    total_staff = Staff.query.count()
+    total_staff = User.query.count()
     total_products = Product.query.count()
     total_inventories = Inventory.query.count()
     total_categories = Category.query.count()
