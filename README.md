@@ -12,3 +12,6 @@ Create environment
 <!-- Used to automatically run/update after saving -->
 ### If it prompts that there are missing modules or libraries, please run
 ```pip install -r requirement.txt```
+
+### If something error, please delete all __pycache__ folders in project
+
