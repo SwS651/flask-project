@@ -13,6 +13,7 @@ from app.models.user import User
 from app.models.product import Product,Inventory
 from app.models.supplier import Supplier
 from app.models.sale import Sale,Sale_Item
+from app.models.cashflow import Cashflow
 
 from app.plotly_graphs import *
 from flask_principal import UserNeed,RoleNeed,identity_loaded
@@ -57,6 +58,9 @@ def create_app(config_class = Config):
 
     from app.auth import auth as auth_bp
     app.register_blueprint(auth_bp)
+    
+    from app.cashflow.routes import bp as cashflow_bp
+    app.register_blueprint(cashflow_bp, url_prefix='/cashflow')
     
         
     @app.route('/')
@@ -106,7 +110,7 @@ def create_app(config_class = Config):
         product = query if query.first() else None
         print(product)
         with app.app_context():
-            staff = Staff(Name="admin",Email="admin@mail.com",Password="su",Role="admin")
+            staff = User(Name="admin",Email="admin@mail.com",Password="su",Role="admin")
             supplier = Supplier(Name="K Company",Address="Unkown Address")
             db.session.add_all([staff])
             db.session.add_all([supplier])

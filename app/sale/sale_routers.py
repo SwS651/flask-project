@@ -2,6 +2,7 @@ from datetime import datetime,date, timedelta
 
 from flask_login import current_user, login_required
 
+from app.cashflow.routes import insert_to_cashflow
 from app.models.product import Product,Inventory
 from app.models.user import User
 from app.sale import bp
@@ -23,6 +24,7 @@ class PaymentForm(FlaskForm):
     submit = SubmitField('End Payment')
 
 @bp.route('/', methods=['GET','POST'])
+@login_required
 def sales_index():
     sales, product_totals,staff_totals = get_Info()
     return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date)
@@ -40,6 +42,7 @@ def get_Info():
     return sales, product_query_totals, staff_query_totals
 
 @bp.route('/search')
+@login_required
 def search_sales():
     sales, product_totals,staff_totals = get_Info()
 
@@ -81,6 +84,7 @@ def get_draft_sale():
     return Sale.query.filter(Sale.Status == "draft").first()
 
 @bp.route('/checkout/', methods=['GET','POST'])
+
 @login_required
 def show_checkout_page():
     products = Product.query.filter(Product.Status == "InStock").all()
@@ -96,9 +100,12 @@ def show_checkout_page():
         # total_inventory = [sum(inventory.Available_QTY for inventory in product.Inventories) for product in products]
     else:
         sale = create_sale()
-    return render_template('sales/checkout.html',products=products,sale = sale, form=form,username=user.Last_Name + '' + user.First_Name)
+    return render_template('sales/checkout.html',products=products,sale = sale, form=form,username=current_user.Last_Name + '' + current_user.First_Name)
+
+
 
 @bp.route('/add',methods=["GET"])
+@login_required
 def add_sale_item():
     item_id = request.args.get("item",None)
     if item_id:
@@ -127,6 +134,7 @@ def add_sale_item():
 
 
 @bp.route('/<int:item>/delete',methods=["GET","POST"])
+@login_required
 def remove_sale_item_from_checkout(item):
     sale_item = Sale_Item.query.get_or_404(item)
     if sale_item.Quantity > 1:
@@ -142,6 +150,7 @@ def remove_sale_item_from_checkout(item):
     return redirect(url_for('sale.show_checkout_page')) 
 
 @bp.route('/sale/<int:item>/delete',methods=["GET","POST"])
+@login_required
 def remove_sale_items(item):
     sale_item = Sale_Item.query.get_or_404(item)
     sale = Sale.query.get_or_404(sale_item.Report_id)
@@ -194,6 +203,12 @@ def finalize_checkout(id):
     db.session.commit()
     print(inventory)
 
+    insert_to_cashflow(
+        particular=f'Sales ({sale.Type_Payment})',
+        debit = sale.Total,
+        remark= f'Sales ({sale.Type_Payment}) | Record from: CheckOUT ({datetime.strftime(datetime.now(),'%Y-%m-%d %H:%M:%S')})'
+    )
+
     return redirect(url_for("sale.sales_index"))
 
 # def update_inventory
@@ -209,6 +224,7 @@ def update_sale_Total(id):
 
 
 @bp.route('/detail',methods=['GET'])
+
 @login_required
 def get_sale_detail():
     id = request.args.get('id')

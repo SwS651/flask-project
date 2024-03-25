@@ -75,10 +75,13 @@
                 <td>{{item.Quantity}}</td>
                 <td>{{item.SalePrice}}</td>
             
-                <td><a id="delete" class="button error" href="{{url_for('sale.remove_sale_items',item = item.id)}}"
+                <td>
+                    {% for role in current_user.roles if role.name == 'admin' %}
+                    <a id="delete" class="button error" href="{{url_for('sale.remove_sale_items',item = item.id)}}"
                     onclick="return confirm('Are you sure you want to remove this item? \nWarning, these items are provided by the system, manual deletion will cause serious errors.')">
                         <i class='bx bx-trash-alt'></i>
                     </a>
+                    {% endfor %}
                 </td>
             </tr>
             {% endfor %}

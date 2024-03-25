@@ -30,7 +30,9 @@
     </form>
 
     <div class="breadcrumb">
+        {% for role in current_user.roles if role.name == 'admin' %}
         <a href="{{ url_for('product.create_product') }}" class="btn">Add New</a> <br>
+        {% endfor %}
         <form action="{{url_for('product.search_product')}}" method="get">
 
             <input class="search-field" type="text" placeholder="Seach" name="query">
@@ -82,11 +84,12 @@
                                 <button type="button" class="button" id="cancel" href="javascript:;" style="display: none;">Cancel</button>
     
                         </form>
-    
+                        {% for role in current_user.roles if role.name == 'admin' %}
                         <form method="POST" action="{{ url_for('product.delete_product', id=product.id) }}" style="display: inline-block;">
     
                                 <button id="delete" class="button" type="submit" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
                         </form>
+                        {% endfor %}
                         </td>
                     </tr>
                 {% endfor %}

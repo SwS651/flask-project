@@ -7,8 +7,8 @@ from flask_login import LoginManager
 # from app.models.product import Product, Inventory
 db = SQLAlchemy()
 login_manager = LoginManager()
-principals = Principal()
 admin_permission = Permission()
+principals = Principal()
 
 from app.models.user import User,Role
 def init_extensions(app):
@@ -35,3 +35,4 @@ def init_extensions(app):
 
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
+    principals.init_app(app)

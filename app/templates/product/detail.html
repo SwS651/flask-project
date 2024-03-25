@@ -112,6 +112,7 @@
             
 
         </div>
+        {% for role in current_user.roles if role.name == 'admin' %}
         <div class="grid-item">
             
     
@@ -181,9 +182,10 @@
                     </ul>
                     <button class="button info" type="submit" name="save_category">Save Changes</button>
                 </form>
-
+                
             </div>
-          </div>
+        </div>
+        {% endfor %}
     </div>
 
     

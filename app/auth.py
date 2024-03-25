@@ -73,7 +73,6 @@ def login():
 
 @auth.route('/signup',methods=["GET"])
 def signup():
-
     return redirect(url_for('user.create_staff'))
         
 

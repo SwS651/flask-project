@@ -38,11 +38,11 @@
                 <th>Email</th>
                 <th>Role</th>
                 <th>Last Login</th>
-                <th>Action</th>
+                {% for role in current_user.roles if role.name == 'admin' %}<th>Action</th>{% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% for staff in staffs %}
+            {% for staff in staffs if not staff == current_user %}
             <tr>
                 
                   
@@ -68,6 +68,8 @@
                 <td>
                     {{ staff.Last_Login}}
                 </td> 
+
+                {% for role in current_user.roles if role.name == 'admin' %}
                 <td>
                     <!-- <button type="button" class="button info" id="edit" href="javascript:;"><i class='bx bx-edit'></i></button>
                     <button type="submit" class="button info" id="update" style="display: none;"><i class='bx bx-check'></i></button>
@@ -78,7 +80,8 @@
                 <form method="POST" action="{{ url_for('user.delete_staff', id=staff.id) }}" style="display: inline-block;">
                     <button id="delete" type="submit" class="button error" onclick="return confirm('Are you sure you want to delete this item?')"><i class='bx bx-trash-alt'></i></button>
                 </form>
-                </td>    
+                </td>   
+                {% endfor %} 
                
             </tr>
             {% endfor %}

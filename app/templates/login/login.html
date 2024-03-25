@@ -4,68 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='/css/style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='/css/flex.css')}}">
+    <style>
+        .custom-container{
+            /* width: 450px;
+            height: 400px; */
+            padding: 30px;
+            margin: 10px auto;
+            background: #f3f3f3;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+    </style>
 </head>
-<body>
-    <h2>User Login</h2>
-
-    <form action="{{url_for('auth.login')}}" method="post">
-        {{ form.csrf_token }}
-
-        {{ form.email.label }}
-        {{ form.email()}}
-        {% for error in form.email.errors %}
-        <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-
-        {{ form.password.label }}
-        {{ form.password()}}
-        {% for error in form.password.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-
-        <div class="field">
-            <label class="checkbox">
-                <input type="checkbox" name="remember">
-                Remember me
-            </label>
-        </div>
-        <input type="submit" value="Login">
-
-    </form>
-
-    <div>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul class="flashes">
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% endwith %}
+<body class="flex flex-center-center flex-direction-column">
+    <div class="custom-container flex flex-center-center flex-direction-column" >
+            <h2>User Login</h2>
+            <br>
+            <form class="flex flex-direction-column" style="min-width: 300px;" action="{{url_for('auth.login')}}" method="post">
+                {{ form.csrf_token }}
+                
+                {{ form.email.label }}
+                {{ form.email()}}
+                {% for error in form.email.errors %}
+                <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+                
+                {{ form.password.label }}
+                {{ form.password()}}
+                {% for error in form.password.errors %}
+                <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+                
+                <div class="field">
+                    <label class="checkbox">
+                        <input type="checkbox" name="remember">
+                        Remember me
+                    </label>
+                </div>
+                <input type="submit" value="Login">
+                
+            </form>
+            
+            <div>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <br>
+            <p id="forget_">Forget Password? click here</p>
+            <br>
+            <div  style="display: none;" id="reset_password">
+                <form class="flex flex-center-center flex-direction-column" style="min-width: 300px;" action="{{url_for('auth.general_reset_password')}}" method="post">
+                    <span style="text-align: center;"> -- </span>
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="" style="width: 100%;" required><br>
+                    <label for="secret_pin">6 digits pins</label>
+                    <input type="number" name="secret_pin" id="" min="6" style="width: 100%;" required><br>
+                    <span>Enter your 6 digits pin to reset password</span><br>
+                    <input type="submit" value="Reset">
+                </form>
+            </div>
     </div>
 
 
 
 
-    <p id="forget_">Forget Password? click here</p>
-    <div style="display: none;" id="reset_password">
-        <form action="{{url_for('auth.general_reset_password')}}" method="post">
-    
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="" required><br>
-            <label for="secret_pin">6 digits pin:</label>
-            <input type="number" name="secret_pin" id="" min="6" required><br>
-            <span>Enter your 6 digits pin to reset password</span>
-            <input type="submit" value="Reset">
-        </form>
-    </div>
 
     <script>
-        document.getElementById('forget_').addEventListener('click',()=>{
+        document.getElementById('forget_').addEventListener('click',(e)=>{
             console.log('ssss')
             var d = document.getElementById('reset_password')
             d.style.display = 'block';
+            e.target.style.display = 'none';
         })
     </script>
 </body>

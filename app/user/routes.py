@@ -1,6 +1,6 @@
 
 from datetime import datetime
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.user import bp
 from app.models.user import Role, User
 from flask import flash, render_template, request, redirect, url_for
@@ -42,6 +42,7 @@ class EditStaffForm(FlaskForm):
 
 
 @bp.route('/')
+@login_required
 def index():
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('q', '')
@@ -52,7 +53,9 @@ def index():
         staffs = User.query.paginate(page = page, per_page=10)
 
     return render_template('admin/staff_management.html', staffs=staffs,form =form)
+
 @bp.route('/add', methods=['GET','POST'])
+@login_required
 def create_staff():
     form = CreateStaffForm()
     
@@ -84,6 +87,7 @@ def create_staff():
 
 
 @bp.route('/<int:id>/edit', methods=['GET','POST'])
+@login_required
 def get_staff(id):
     staff = User.query.get_or_404(id)
     form = EditStaffForm(obj=staff)
@@ -106,6 +110,7 @@ def get_staff(id):
 
 
 @bp.route('/<int:id>/delete', methods=['POST'])
+@login_required
 def delete_staff(id):
     staff = User.query.get_or_404(id)
     db.session.delete(staff)
@@ -116,23 +121,24 @@ def delete_staff(id):
 
     
 
-@bp.route('/<int:id>/quick_edit', methods=['GET','POST'])
-def quick_edit(id):
-    staff = User.query.get_or_404(id)
-    form = EditStaffForm(obj=staff)
-    if request.method =="POST":
+# @bp.route('/<int:id>/quick_edit', methods=['GET','POST'])
+# def quick_edit(id):
+#     staff = User.query.get_or_404(id)
+#     form = EditStaffForm(obj=staff)
+#     if request.method =="POST":
 
-        staff.StaffID = form.id.data
-        staff.First_Name = form.first_name.data
-        staff.Email = form.email.data
-        db.session.commit()
-        flash('Staff member updated successfully!', 'success')
-        return redirect(url_for('user.index'))
-    else:
-        return render_template('admin/staff_management.html',staffs = User.query.all(), form =  form)
+#         staff.StaffID = form.id.data
+#         staff.First_Name = form.first_name.data
+#         staff.Email = form.email.data
+#         db.session.commit()
+#         flash('Staff member updated successfully!', 'success')
+#         return redirect(url_for('user.index'))
+#     else:
+#         return render_template('admin/staff_management.html',staffs = User.query.all(), form =  form)
 
 
 @bp.route('/change_password', methods=['POST'])
+@login_required
 def change_password():
     form = ChangePasswordForm()
     id = request.args.get('id')
@@ -155,6 +161,7 @@ def change_password():
 
 
 @bp.route('/search')
+@login_required
 def search_staff():
     keyword = request.args.get('q','')
     staffs = User.query.filter(db.or_(User.StaffID.ilike(f'%{keyword}%'), User.Last_Name.ilike(f'%{keyword}%'),User.First_Name.ilike(f'%{keyword}%')))

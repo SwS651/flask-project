@@ -33,8 +33,10 @@
 {% block content %}
 
 
-<h3> -- Import -- </h3>
+<h3>Import</h3>
+<p>Only Admin can import data & CSV</p>
 <br>
+{% for role in current_user.roles if role.name == 'admin' %}
 <div class="flex flex-item-center" style="margin-bottom: 30px;">
     <a class="custom-box" href="">Product</a>
     <a class="custom-box" href="">Inventory</a>
@@ -42,14 +44,13 @@
     <a class="custom-box" href="">Supplier</a>
     <a class="custom-box" href="">Cash Flow</a>
 </div>
+{% endfor %}
 
-
-<h3> -- Export -- </h3>
+<h3>Export</h3>
 <br>
 <div class="flex flex-item-center" style="margin-bottom: 30px;">
-    <a class="custom-box" href="{{url_for("main.inventory_report")}}">Inventory</a>
     <a class="custom-box" href="{{url_for("main.sales_report")}}">Sales Report</a>
-    <a class="custom-box" href="">Cash Flow</a>
+    <a class="custom-box" href="{{url_for('main.cashflow_report')}}">Cash Flow</a>
 </div>
 
 {% endblock %}

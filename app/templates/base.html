@@ -41,7 +41,7 @@
                             <li class="menu-link {% block nav_supplier %}{% endblock %}"><i class='nav-icon bx bxs-buildings' ></i><a href="{{ url_for('supplier.index') }}">Supplier</a></li>
                             <li class="menu-link {% block nav_report %}{% endblock %}"><i class='nav-icon bx bx-line-chart' ></i><a href="{{ url_for('sale.sales_index') }}">Sales</a></li>
                             <li class="menu-link {% block nav_checkout %}{% endblock %}"><i class='nav-icon bx bx-dollar-circle' ></i><a href="{{ url_for('sale.show_checkout_page') }}">Check Out</a></li>
-                            <li class="menu-link {% block nav_cashflow %}{% endblock %}"><i class='nav-icon bx bx-book-content'></i><a href="">Cash Flow</a></li>
+                            <li class="menu-link {% block nav_cashflow %}{% endblock %}"><i class='nav-icon bx bx-book-content'></i><a href="{{url_for('cashflow.index')}}">Cash Flow</a></li>
                             <li class="menu-link {% block nav_ImExport %}{% endblock %}"><i class='nav-icon bx bx-transfer'></i><a href="{{url_for('main.imexport_overview')}}">Import & Export</a></li>
                             <li class="menu-link {% block nav_profile %}{% endblock %}"><i class='nav-icon bx bx-user-circle'></i><a href="{{url_for('user.get_staff',id=current_user.id)}}">Profile</a></li>
                         </ul>
@@ -64,8 +64,8 @@
                     <p>Dashboard > Inventory</p>
                 </div>
                 
-                <div class="right-nav">
-                    
+                <div class="right-nav flex flex-center-center">
+                    <span>Welcome! <b>{{current_user.Last_Name + ' ' + current_user.First_Name}}</b></span>
                 </div>
             </header>
             <div class="main-container">
@@ -74,57 +74,48 @@
         </div> 
     </div>
    
-            
-        <div id="preloader"></div>
-        <script src="{{url_for('static', filename='/js/pre-loader.js')}}"></script>
-        <script>
-            const hamburger = document.querySelectorAll(".menu-burger");
-            const main = document.querySelector(".main");
-            var asside = document.getElementById("aside");
-            var root = document.documentElement;
-    
-            hamburger.forEach((hamburger)=>{
-    
-                hamburger.addEventListener("click",()=>{
-                    
-                    if (asside.classList.contains("opened")) { 
-                        console.log("yes")
-                        asside.classList.remove("opened");
-                        main.classList.toggle("full-page")
-                    }else{
-                        asside.classList.toggle("opened");
-                        
-                        main.classList.remove("full-page")
-                    }
-                    // root.style.setProperty('--sidebar-width', '0%');
-                })
-            })
-    
-            // asside.addEventListener('click',()=>{
-            //     if (! asside.classList.contains("opened")){
-            //         asside.classList.toggle("opened");
-            //         main.classList.remove("full-page")
-            //     }
-            // })
-        </script>
-        <script src="{{url_for('static', filename='/js/dark-mode.js')}}"></script>
-        <script src="DataTables/datatables.min.js">
-                
-            new DataTable('#example');
-        </script>
-        <script>
-            $(document).ready(function () {
-                $('#data').DataTable({
-                    columns: [
-                    null,
-                    {searchable: false},
-                    {orderable: false, searchable: false},
-                    {orderable: false, searchable: false},
-                    null],
-                });
-            });
-        </script>
+    <script>
+        const hamburger = document.querySelectorAll(".menu-burger");
+        const main = document.querySelector(".main");
+        var asside = document.getElementById("aside");
+        var root = document.documentElement;
 
-        {% block jscontent %}{% endblock %}
+        hamburger.forEach((hamburger)=>{
+
+            hamburger.addEventListener("click",()=>{
+                
+                if (asside.classList.contains("opened")) { 
+                    console.log("yes")
+                    asside.classList.remove("opened");
+                    main.classList.toggle("full-page")
+                }else{
+                    asside.classList.toggle("opened");
+                    
+                    main.classList.remove("full-page")
+                }
+                // root.style.setProperty('--sidebar-width', '0%');
+            })
+        })
+    
+
+    </script>
+    <script src="DataTables/datatables.min.js">
+            
+        new DataTable('#example');
+    </script>
+    <script>
+        // $(document).ready(function () {
+        //     $('#data').DataTable({
+        //         columns: [
+        //         null,
+        //         {searchable: false},
+        //         {orderable: false, searchable: false},
+        //         {orderable: false, searchable: false},
+        //         null],
+        //     });
+        // });
+    </script>
+
+    {% block jscontent %}{% endblock %}
     </body>
     </html>

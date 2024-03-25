@@ -1,9 +1,12 @@
 from io import BytesIO
 from flask import Blueprint, render_template, request
+from flask_login import login_required
 import numpy as np
+from app.cashflow.routes import get_month_value
 from app.extensions import db
 
 from datetime import date, datetime, timedelta
+from app.models.cashflow import Cashflow
 from app.models.supplier import Supplier
 from app.models.category import Category
 from app.models.user import User
@@ -18,20 +21,31 @@ main = Blueprint('main', __name__)
 
 
 @main.route('/imexport')
+@login_required
 def imexport_overview():
     
     return render_template('imexport_overview.html')
 
 
 @main.route('/sales_report',methods=["GET"])
+@login_required
 def sales_report():
     return render_template('sales_report.html')
+
 @main.route('/inventory_report',methods=["GET"])
+@login_required
 def inventory_report():
     products = Product.query.all()
     return render_template('inventory_report.html',products=products)
 
+@main.route('/cashflow_report',methods=["GET"])
+@login_required
+def cashflow_report():
+    
+    return render_template('cashflow_report.html')
+
 @main.route('/export_sales_report',methods=["GET"])
+@login_required
 def generate_sales_report():
     
 
@@ -124,6 +138,72 @@ def generate_sales_report():
     pdf.output(pdf_bytes)
     pdf_bytes.seek(0)
     return send_file(pdf_bytes, as_attachment=False,download_name='sample1.pdf')
+
+
+@main.route('/export_cashflow_report', methods=['GET'])
+def generate_cashflow_report():
+
+    
+    date = datetime.strptime(request.args.get('date'),'%Y-%m')
+    first_day_month, lastday_of_month, firstday_of_previous_month, lastday_of_previous_month = get_month_value(date.replace(day=1,hour=0,minute=0,second=0))
+    cashflow = Cashflow.query.filter(Cashflow.date>=first_day_month,Cashflow.date<=lastday_of_month).order_by(Cashflow.date).all()
+
+    pdf = FPDF(orientation="P", unit="mm", format="A4")
+    pdf.add_page()
+    pdf.set_font("helvetica", size=16,style="B")
+    pdf.cell(40, 10, "S-Mart Cash Flow REPORT",align='CENTER', center=True)
+    pdf.ln()
+
+
+    pdf.set_y(25)
+    pdf.set_font("helvetica", size=8,style='B')
+    pdf.line(11, 32,19.5,32)
+    pdf.cell(20, 10, "DATE: ")
+    pdf.set_font(style='')
+    pdf.cell(40, 10, f"{first_day_month}   to   {lastday_of_month}")
+
+
+    pdf.ln()
+    pdf.ln()
+    pdf.cell(40, 10, "DETAIL")
+    pdf.ln()
+
+
+    # Add table header
+    pdf.set_fill_color(224, 235, 255)
+    # for column_name in columns:
+    #     pdf.cell(20, 10, column_name, border=1, fill=True)
+
+    # Table Header
+    pdf.cell(35, 7, 'Date', border=1, fill=True,align='CENTER')
+    # pdf.cell(50, 7, 'StockI', border=1, fill=True,align='CENTER')
+    pdf.cell(50, 7, 'Particulars', border=1, fill=True,align='CENTER')
+    pdf.cell(20, 7, 'Debit', border=1, fill=True,align='CENTER')
+    pdf.cell(20, 7, 'Credit', border=1, fill=True,align='CENTER')
+    pdf.cell(20, 7, 'Balance', border=1, fill=True,align='CENTER')
+    pdf.cell(40, 7, 'Remarks', border=1, fill=True,align='CENTER')
+
+    pdf.ln()
+
+    # Table data
+    for c in cashflow:
+        pdf.cell(35, 7, f'{c.date}', border=1,align='CENTER')
+        pdf.cell(50, 7, f'{c.particulars}', border=1,align='CENTER')
+        pdf.cell(20, 7, f'{c.debit}', border=1,align='CENTER')
+        pdf.cell(20, 7, f'{c.credit}', border=1,align='CENTER')
+        pdf.cell(20, 7, f'{c.balance}', border=1,align='CENTER')
+        pdf.cell(40, 7,f'{c.remarks}', border=1)
+
+        pdf.ln()
+
+    pdf.ln()
+    pdf.ln()
+    pdf.cell(80,10,'Note : This is an automatic generated document. No signature is required')
+    pdf_bytes = BytesIO()
+    pdf.output(pdf_bytes)
+    pdf_bytes.seek(0)
+    return send_file(pdf_bytes, as_attachment=False,download_name='sample1.pdf')
+
 
 
 @main.route('/export_inventory_report', methods=['GET'])

@@ -1,4 +1,5 @@
 
+from flask_login import login_required
 from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms.validators import InputRequired,DataRequired,Length
@@ -16,6 +17,7 @@ class CategoryForm(FlaskForm):
 
 
 @bp.route('/', methods=['GET'])
+@login_required
 def index():
     form = CategoryForm()
     # categories = Category.query.all()
@@ -27,6 +29,7 @@ def index():
 
 # Search operation
 @bp.route('/search', methods=['GET'])
+@login_required
 def search_category():
     query = request.args.get('query',None)
     form = CategoryForm()
@@ -38,6 +41,7 @@ def search_category():
 
 # Read operation
 @bp.route('/<int:category_id>', methods=['GET'])
+@login_required
 def get_category(category_id):
     # category = Category.query.get(category_id)
     category = Category.query.filter(Category.id == category_id)
@@ -46,6 +50,7 @@ def get_category(category_id):
     return render_template("product/categories.html",categories = category,form=form)
 
 @bp.route('/create', methods=['GET','POST'])
+@login_required
 def create_category():
     form=CategoryForm()
     print(form.validate_on_submit())
@@ -65,6 +70,7 @@ def create_category():
     
 
 @bp.route('/<category_name>/edit', methods=['POST'])
+@login_required
 def edit_category(category_name):
     category = db.one_or_404(db.select(Category).filter(Category.Name == category_name))
     form = CategoryForm(obj=category)
@@ -80,6 +86,7 @@ def edit_category(category_name):
         return render_template("product/categories.html",categories = Category.query.all(),form=form)
 
 @bp.route('/<int:id>/delete', methods=['GET'])
+@login_required
 def delete_category(id):
     category = Category.query.get_or_404(id)
 

@@ -1,4 +1,5 @@
 
+from flask_login import login_required
 from app.supplier import bp
 from flask import render_template, request, redirect, url_for
 from app.models.supplier import Supplier
@@ -7,6 +8,7 @@ from app import db
 
 # Create Supplier
 @bp.route('/add', methods=['POST'])
+@login_required
 def add_supplier():
     name = request.form['name']
     contact = request.form['contact']
@@ -22,12 +24,14 @@ def add_supplier():
 
 # Read Supplier
 @bp.route('/<int:id>')
+@login_required
 def get_supplier(id):
     supplier = Supplier.query.get(id)
     return render_template('supplier/detail.html', supplier=supplier)
 
 # Update Supplier
 @bp.route('/update/<int:id>', methods=['POST'])
+@login_required
 def update_supplier(id):
     supplier = Supplier.query.get(id)
     supplier.Name = request.form['name']
@@ -39,6 +43,7 @@ def update_supplier(id):
 
 # Delete Supplier
 @bp.route('/delete/<int:id>')
+@login_required
 def delete_supplier(id):
     supplier = Supplier.query.get(id)
     db.session.delete(supplier)
@@ -47,6 +52,7 @@ def delete_supplier(id):
 
 # Search Supplier
 @bp.route('/search')
+@login_required
 def search_supplier():
     keyword = request.args.get('q','')
     suppliers = Supplier.query.filter(Supplier.Name.ilike(f'%{keyword}%')).all()
@@ -54,6 +60,7 @@ def search_supplier():
 
 # Pagination Supplier
 @bp.route('/')
+@login_required
 def index():
     page = request.args.get('page', 1, type=int)
     per_page =  request.args.get('per_page', 10, type=int)

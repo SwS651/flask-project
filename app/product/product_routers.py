@@ -1,4 +1,5 @@
 
+from flask_login import login_required
 from app.models.category import Category
 from app.models.supplier import Supplier
 from app.product import bp
@@ -11,8 +12,9 @@ from wtforms import BooleanField, IntegerField, SelectField, SelectMultipleField
 from wtforms.validators import InputRequired,Optional
 
 from app.product.inventory_routers import InventoryForm
+from flask_principal import Permission,RoleNeed
 
-
+admin_permission = Permission(RoleNeed('admin'))
 class CreateProductForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired()])
     barcode = IntegerField('BarCode', validators=[InputRequired()])
@@ -26,6 +28,7 @@ class CreateProductForm(FlaskForm):
         self.categories.choices = [(category.id, category.Name) for category in Category.query.all()]
 
 @bp.route('/',methods=["GET"])
+@login_required
 def index():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -47,6 +50,7 @@ def index():
 
 
 @bp.route('/category/<category_name>')
+@login_required
 def products_by_category(category_name):
     # Query the Category table to find the category with the given name
     category = Category.query.filter_by(Name=category_name).first()
@@ -63,6 +67,7 @@ def products_by_category(category_name):
 
 
 @bp.route('/<barcode>/', methods=['GET'])
+@login_required
 def get_product(barcode):
 
     if barcode:
@@ -82,6 +87,7 @@ def get_product(barcode):
 
 
 @bp.route('/search/', methods=['GET'])
+@login_required
 def search_product():
     categories = Category.query.all()
     products = Product.query.all()
@@ -102,6 +108,7 @@ def search_product():
 
     
 @bp.route('/create', methods=['GET', 'POST'])
+@login_required
 def create_product():
     form = CreateProductForm()
     categories = Category.query.all()
@@ -138,6 +145,7 @@ def create_product():
 
     
 @bp.route('/quick_edit/<barcode>', methods=['GET', 'POST'])
+@login_required
 def quick_edit(barcode):
     # product = db.one_or_404(db.select(Product).filter_by(BarCode=barcode))
     product = Product.query.filter_by(BarCode=barcode).first_or_404()
@@ -158,6 +166,7 @@ def quick_edit(barcode):
 
 
 @bp.route('/<barcode>/edit', methods=['GET', 'POST'])
+@login_required
 def edit_product(barcode):
     product = Product.query.filter_by(BarCode=barcode).first_or_404()
     categories = Category.query.all()
@@ -188,6 +197,8 @@ def edit_product(barcode):
 
 
 @bp.route('/product/<int:id>/delete')
+@login_required
+@admin_permission.require(http_exception=401)
 def delete_product(id):
     product = Product.query.get_or_404(id)
     product.delete()

@@ -102,7 +102,11 @@
                 {% if sale.Status == "draft" %}
                 <td><a href="{{url_for('sale.show_checkout_page')}}">Edit</a></td>
                 {% else %}
-                <td><a href="{{url_for('sale.get_sale_detail',id = sale.id)}}">view</a></td>
+                <td>
+                    <a href="{{url_for('sale.get_sale_detail',id = sale.id)}}">view</a>
+                    {% for role in current_user.roles if role.name == 'admin' %}{% endfor %}
+                
+                </td>
                 {% endif %}
             </tr>
             {% endfor %}
