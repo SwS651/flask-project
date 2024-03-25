@@ -47,6 +47,8 @@
                         <tr>
                            <th>Product</th>
                            <th>Quantity</th>
+                           <th>Retail Price</th>
+                           <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,6 +56,9 @@
                             <tr>
                                 <td>{{product.Name}}</td>
                                 <td>{{ product.Quantity }}</td>
+                                <td>
+                                  
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -66,16 +71,24 @@
     <div class="table-container scrollable">
         <h3>Sales Report</h3>
         <form action="{{url_for('sale.search_sales')}}" method="GET">
-            <div class="flex flex-start-center">
-                <div class="" style="margin: 0 10px 0 0;">
-                     <label for="start_date">Start Date:</label>
-                    <input type="date" id="start_date" name="start_date" required>
+            <div class="flex flex-between-center">
+
+                <div class="flex flex-start-center">
+                    <div class="" style="margin: 0 10px 0 0;">
+                        <label for="start_date">Start Date:</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="">
+                        <label for="end_date">End Date:</label>
+                        <input type="date" id="end_date" name="end_date" required>
+                    </div>
+                    <button type="submit" class="button info" style="margin: 10px 0 0 10px;">Search</button>
                 </div>
                 <div class="">
-                    <label for="end_date">End Date:</label>
-                    <input type="date" id="end_date" name="end_date" required>
+                    <p style="font-size: 1.5rem;">
+                        Total Sales: RM {{total_sales}}
+                    </p>
                 </div>
-                <button type="submit" class="button info" style="margin: 10px 0 0 10px;">Search</button>
             </div>
         </form>
         <br><br>
@@ -83,9 +96,9 @@
             <tr> 
                 <th>No</th>
                 <th>Date</th>
-                <th>Tax</th>
-                <th>Discount</th>
-                <th>Type</th>
+               
+                <th>Discount (%)</th>
+                <th>Payment</th>
                 <th>Total</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -94,7 +107,6 @@
             <tr> 
                 <td>{{sale.id}}</td>
                 <td>{{sale.Date}}</td>
-                <td>{{sale.Tax}}</td>
                 <td>{{sale.Discount}}</td>
                 <td>{{sale.Type_Payment}}</td>
                 <td>{{sale.Total}}</td>
@@ -103,7 +115,7 @@
                 <td><a href="{{url_for('sale.show_checkout_page')}}">Edit</a></td>
                 {% else %}
                 <td>
-                    <a href="{{url_for('sale.get_sale_detail',id = sale.id)}}">view</a>
+                    <a href="{{url_for('sale.get_sale_detail',date = sale.Date)}}">view</a>
                     {% for role in current_user.roles if role.name == 'admin' %}{% endfor %}
                 
                 </td>

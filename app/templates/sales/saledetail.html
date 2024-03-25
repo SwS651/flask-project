@@ -14,43 +14,20 @@
 
 <div class="grid-container two-grid">
     <div class="grid-item">
-        <div class="form-container">
-            <form action="">
+        <div class="">
+                
+                
 
-                <label for="staff_id">Staff ID</label>
-                <input type="text" name="" id="" value="{{sale.Staff_id}}"disabled>
-                <label for="date">Date</label>
-                <input type="date" name="" id="" value="{{sale.Date}}"disabled>
-                <label for="tax">Tax</label>
-                <input type="number" name="" id="" value="{{sale.Tax}}"disabled>
-                <label for="discount">Discount</label>
-                <input type="number" name="" id="" value="{{sale.Discount}}"disabled>
-                <label for="total">Total</label>
-                <input type="number" name="" id="" value="{{sale.Total}}"disabled>
-                <label for="status">Status</label>
-                <input type="text" name="" id="" value="{{sale.Status}}"disabled>
-            </form>
         </div>
     </div>
     <div class="grid-item">
-        <div class="form-container">
-            <h3>Payment Info</h3>
-            <form method="post">
-                
-                <label for="type_payment">Type Payment</label>
-                <input type="text" name="type_payment" value="{{sale.Type_Payment}}">
-                <label for="no_refer">No Refer</label>
-                <input type="text" name="no_refer" value="{{sale.No_Refer}}">
 
-                
-                <!-- Add more input fields as needed -->
-                <button type="submit" class="button primary">Update</button>
-            </form>
-        </div>
     </div>
 </div>
 <div class="table-container">
     <h3>Sale Items</h3>
+    {% for sale in sales %}
+                {{sale.Date}} | {{sale.Staff_id}}
     <table>
         <thead>
             <tr>
@@ -62,32 +39,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in sale.Sale_items %}
-            <tr>
-                {% for product in products%}
-                {% for inventory in product.Inventories%}
-                {% if inventory.id == item.Inventory_id %}
-                <td>{{product.Name}}</td>
-                {% endif %}
-                {% endfor %}
-                {% endfor %}
-                <td>{{item.Inventory_id}}</td>
-                <td>{{item.Quantity}}</td>
-                <td>{{item.SalePrice}}</td>
             
-                <td>
-                    {% for role in current_user.roles if role.name == 'admin' %}
-                    <a id="delete" class="button error" href="{{url_for('sale.remove_sale_items',item = item.id)}}"
-                    onclick="return confirm('Are you sure you want to remove this item? \nWarning, these items are provided by the system, manual deletion will cause serious errors.')">
-                        <i class='bx bx-trash-alt'></i>
-                    </a>
-                    {% endfor %}
-                </td>
-            </tr>
-            {% endfor %}
-
+            
         </tbody>
     </table>
+    {% endfor %}
 </div>
 {% endblock  %}
 

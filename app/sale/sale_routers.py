@@ -11,27 +11,30 @@ from flask import render_template, request, redirect, url_for
 from app import db
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, DecimalField, BooleanField, SubmitField
+from wtforms import SelectField, StringField, DecimalField, BooleanField, SubmitField
 from wtforms.validators import InputRequired, NumberRange
 
 class PaymentForm(FlaskForm):
     type_payment = StringField('Type Payment', validators=[InputRequired()], render_kw={"autocomplete": "off"})
     no_refer = StringField('No. Refer', validators=[], render_kw={"autocomplete": "off"})
-    tax = DecimalField('Tax', validators=[InputRequired(), NumberRange(min=0)], places=2)
-    discount = DecimalField('Discount', validators=[InputRequired(), NumberRange(min=0)], places=2)
+    discount = DecimalField('Discount (%)', validators=[InputRequired(), NumberRange(min=0)], places=2)
     total = DecimalField('Total', validators=[InputRequired(), NumberRange(min=0)], places=2)
     custom_price = BooleanField('Save Custom Total Price')
     submit = SubmitField('End Payment')
+
+    choices = [('cash', 'Cash'), ('e-wallet/DuitNow', 'E-Wallet/DuitNow')]
+    type_payment = SelectField('Select an option', choices=choices,default='cash')
 
 @bp.route('/', methods=['GET','POST'])
 @login_required
 def sales_index():
     sales, product_totals,staff_totals = get_Info()
-    return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date)
+    total_sales =  db.session.query(db.func.sum(Sale.Total)).filter(Sale.Status=='paid').scalar()  
+    return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date,total_sales=total_sales)
 
 
 def get_Info():
-    sales = Sale.query.order_by(Sale.Status).all()
+    sales = db.session.query(Sale.Date,Sale.Discount,Sale.Type_Payment,db.func.sum(Sale.Total).label('Total'),Sale.Status).filter(Sale.Status=="paid").group_by(Sale.Date).all()
     product_query_totals = db.session.query(Product.Name,db.func.sum(Sale_Item.Quantity).label("Quantity")).filter(Sale.Date == date.today(),Sale.id == Sale_Item.Report_id,Sale.Status == "paid",Inventory.Product_id == Product.id,Inventory.id == Sale_Item.Inventory_id).group_by(Product.Name).all()
     # today_records = Sale.query.filter(Sale.Date == date.today()).all()
     staff_query_totals = db.session.query(Sale.Staff_id,(User.Last_Name + ' ' + User.First_Name).label('Name'),db.func.sum(Sale.Total).label("Total_Amount"))\
@@ -51,12 +54,17 @@ def search_sales():
 
     print(f"start date: {start_date}, enddate: {end_date}")
     # Convert string inputs to datetime objects
+    # start_date = datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=1)
+    # end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
     start_date = datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=1)
-    end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+    
     # Query database for records within the specified date range
-    sales = Sale.query.filter(Sale.Date>=start_date,Sale.Date<=end_date).all()
-        
-    return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date)
+    # sales = Sale.query.filter(Sale.Date>=start_date,Sale.Date<=end_date).all()
+    sales =  db.session.query(Sale.Date,Sale.Discount,Sale.Type_Payment,db.func.sum(Sale.Total).label('Total'),Sale.Status).filter(Sale.Status=="paid",Sale.Date>=start_date,Sale.Date<=end_date).group_by(Sale.Date).all()
+    total_sales =  db.session.query(db.func.sum(Sale.Total)).filter(Sale.Date>=start_date,Sale.Date<=end_date, Sale.Status=="paid").scalar()  
+    return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date,total_sales=total_sales)
 
 
 
@@ -177,7 +185,6 @@ def finalize_checkout(id):
     form = PaymentForm()
     update_sale_Total(sale.id)
     if form.validate_on_submit():
-        tax = float(form.tax.data)
         discount = float(form.discount.data)
         no_refer = form.no_refer.data
         type_payment = form.type_payment.data
@@ -185,10 +192,9 @@ def finalize_checkout(id):
         if form.custom_price.data:
             total = float(form.total.data)
         else:  
-            total = (sale.Total + (sale.Total*(tax/100))) - (sale.Total * (discount/100))
+            total = (sale.Total) - (sale.Total * (discount/100))
 
         sale.Date = datetime.today()
-        sale.Tax = tax
         sale.Discount = discount
         sale.No_Refer = no_refer
         sale.Type_Payment = type_payment
@@ -227,10 +233,11 @@ def update_sale_Total(id):
 
 @login_required
 def get_sale_detail():
-    id = request.args.get('id')
-    sale = Sale.query.get_or_404(id)
+    date = request.args.get('date')
+    sales = Sale.query.filter(Sale.Date == date,Sale.Status == "paid").all()
+    sales = db.session.query((User.Last_Name + ' ' +User.First_Name).label('Person_Name'),Product.Name,Sale_Item.Quantity,Sale_Item.SalePrice).filter(Inventory.id == Sale_Item.Inventory_id,Inventory.Product_id == Product.id,User.id == Sale.Staff_id,Sale.Date == date).order_by(Sale.Date).all()
     products = Product.query.all()
     
     # print(product)
-    return render_template('sales/saledetail.html',sale = sale,products=products)
+    return render_template('sales/saledetail.html',sales = sales,products=products,date = date)
 

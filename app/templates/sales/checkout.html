@@ -16,7 +16,7 @@
         <div class="container_item">
             <p>Sale ID: {{sale.id}} </p>
             <p>Date: {{sale.Date}} </p>
-            <p>Staff: {{username}} </p>
+            <p>Staff: {{username}} (ID: {{sale.Staff_id}})</p>
         </div>
         <div class="container_item">
     
@@ -32,6 +32,7 @@
                         <th>Barcode</th>
                         <th>Product Name</th>
                         <th>QTY</th>
+                        <th>Retail Price</th>
                         <th></th>
                     </tr>
                     
@@ -41,6 +42,16 @@
                     <td>{{product.BarCode}}</td>
                     <td>{{product.Name}}</td>
                     <td>{{available_QTY}}</td>
+                    <td>
+                        {% set aprice =  [] %}
+                        {% for inventory in product.Inventories %}
+                            {% if inventory.Available_QTY > 0 %}
+                            {% set _ = aprice.append(inventory.RetailPrice) %}
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {{aprice[0]}}
+                    </td>
                     <td><a href="{{url_for("sale.add_sale_item",item = product.id)}}"><i class='bx bxs-add-to-queue'></i></a></td>
                 </tr>
                 {% endfor %}
@@ -49,21 +60,22 @@
             </div>
         </div>
         <div class="grid-item">
-            <h3>Check Out</h3>
             <div class="table-container">
+                <h3>Check Out</h3>
 
                 <table class="">
                     <tr>
-                        <th>ID</th>
+                        <th>No</th>
                         <th>Name</th>
                         <th>QTY</th>
                         <th>SalePrice</th>
                         <th></th>
                     </tr>
                     {% if sale %}
+                    {% set counter = 0 %}
                     {% for item in sale.Sale_items %}
                     <tr>
-                        <td>{{ item.id }}</td>
+                        <td>{{ counter+1 }}</td>
                         <td>
                             {% for product in products %}
                             {% for inventory in product.Inventories %}
@@ -75,9 +87,12 @@
                             {% endfor %}
                         </td>
                         <td>{{ item.Quantity }}</td>
-                        <td>{{ item.SalePrice }}</td>
+                        <td>
+                            {{ item.SalePrice }}
+                        </td>
                         <td><a href="{{url_for('sale.remove_sale_item_from_checkout',item = item.id)}}"><i class='bx bx-minus'></i></a></td>
                     </tr>
+                    {% set counter = counter + 1 %}
                     {% endfor %}
                     {% endif %}
                 </table>
@@ -88,19 +103,19 @@
                 <form method="post" action="{{url_for('sale.finalize_checkout',id = sale.id)}}">
                     {{ form.hidden_tag() }}
                     {{form.type_payment.label}}
-                    {{ form.type_payment(class="form-control",value="Cash") }}
+                    {{ form.type_payment(class_="form-control")}}
                     {{form.no_refer.label}}
                     {{form.no_refer(class="form-control") }}
                     <p>Subtotal: <span id="subtotal">{{ sale.Total }}</span></p><br><br><br>
-                    {{form.tax.label}}
-                    {{form.tax(class="form-control",value= 0) }}
                     {{form.discount.label}}
                     {{ form.discount(class="form-control",value=0) }}
                     {{form.total.label}}
                     {{form.total(class="form-control") }}
-                    {{form.custom_price.label}}
-                    {{form.custom_price(class="form-check-input") }}<br><br>
-                    {{form.submit.label}}
+                    
+
+                    {{form.custom_price(class="form-check-input") }}
+                    {{form.custom_price.label(style="display:inline-block")}}
+                    <br><br>
                     {{form.submit(class="button success")}}
                 </form>
             </div>
@@ -113,23 +128,21 @@
 {% block jscontent %}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const taxInput = document.querySelector("input[name='tax']");
             const discountInput = document.querySelector("input[name='discount']");
             const subtotal = document.getElementById('subtotal');
             console.log(subtotal)
             // Function to calculate total amount
             function calculateTotal() {
-                const tax = parseFloat(taxInput.value);
+                
                 stotal = parseFloat(subtotal.innerText);
                 console.log(stotal)
                 subtotal.innerText= stotal
                 const discount = parseFloat(discountInput.value);
-                const total = parseFloat((stotal + (stotal*(tax/100))) - (stotal *(discount/100))).toFixed(2);
+                const total = parseFloat((stotal) - (stotal *(discount/100))).toFixed(2);
                 document.querySelector("input[name='total']").value = total;
             }
 
             // Add event listeners to tax and discount inputs
-            taxInput.addEventListener("input", calculateTotal);
             discountInput.addEventListener("input", calculateTotal);
 
             // Initially calculate total amount

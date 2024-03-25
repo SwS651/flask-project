@@ -58,7 +58,7 @@ def generate_sales_report():
     total_qty =  db.session.query(db.func.sum(Sale_Item.Quantity)).filter(Sale.Date==date,Sale_Item.Report_id == Sale.id).scalar()
     product_query_totals = db.session.query(
                             Product.Name,Product.BarCode,db.func.sum(Sale_Item.Quantity).label("Quantity"),Sale.Type_Payment,Sale_Item.SalePrice,Sale.Discount).filter(Sale.Date == date,Sale.id == Sale_Item.Report_id,Sale.Status == "paid",Inventory.Product_id == Product.id,Inventory.id == Sale_Item.Inventory_id).group_by(Product.Name,Sale.Type_Payment,Sale.Discount).all()
-    person_name = [sale.Staff_id for sale in sales]
+    person =  db.session.query((User.Last_Name + ' ' + User.First_Name).label('Name'),User.StaffID).filter(Sale.Date == date, Sale.Staff_id == User.id).group_by((User.Last_Name + ' ' + User.First_Name).label('Name')).all()
 
     # Extract column names from the SQLAlchemy model
     # columns = [column.key for column in inspect(User).c]
@@ -75,9 +75,9 @@ def generate_sales_report():
     pdf.set_font(style='')
     pdf.set_x(40)
 
-    for i ,name in enumerate(person_name):
+    for i ,p in enumerate(person):
         pdf.set_xy(40,25+(5 * i))
-        pdf.cell(40, 10, name)
+        pdf.cell(40, 10, f"{p.Name} (ID: {p.StaffID})")
     pdf.set_xy(80,25)
     pdf.set_font(style='B')
     pdf.line(81, 31.5,89.5,31.5)
