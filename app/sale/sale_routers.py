@@ -34,7 +34,7 @@ def sales_index():
 
 
 def get_Info():
-    sales = db.session.query(Sale.Date,Sale.Discount,Sale.Type_Payment,db.func.sum(Sale.Total).label('Total'),Sale.Status).filter(Sale.Status=="paid").group_by(Sale.Date).all()
+    sales = db.session.query(Sale.Date,Sale.Discount,Sale.Type_Payment,db.func.sum(Sale.Total).label('Total'),Sale.Status).filter(Sale.Status=="paid").group_by(Sale.Date,Sale.Discount).all()
     product_query_totals = db.session.query(Product.Name,db.func.sum(Sale_Item.Quantity).label("Quantity")).filter(Sale.Date == date.today(),Sale.id == Sale_Item.Report_id,Sale.Status == "paid",Inventory.Product_id == Product.id,Inventory.id == Sale_Item.Inventory_id).group_by(Product.Name).all()
     # today_records = Sale.query.filter(Sale.Date == date.today()).all()
     staff_query_totals = db.session.query(Sale.Staff_id,(User.Last_Name + ' ' + User.First_Name).label('Name'),db.func.sum(Sale.Total).label("Total_Amount"))\
@@ -62,7 +62,7 @@ def search_sales():
     
     # Query database for records within the specified date range
     # sales = Sale.query.filter(Sale.Date>=start_date,Sale.Date<=end_date).all()
-    sales =  db.session.query(Sale.Date,Sale.Discount,Sale.Type_Payment,db.func.sum(Sale.Total).label('Total'),Sale.Status).filter(Sale.Status=="paid",Sale.Date>=start_date,Sale.Date<=end_date).group_by(Sale.Date).all()
+    sales =  db.session.query(Sale.Date,Sale.Discount,Sale.Type_Payment,db.func.sum(Sale.Total).label('Total'),Sale.Status).filter(Sale.Status=="paid",Sale.Date>=start_date,Sale.Date<=end_date).group_by(Sale.Date,Sale.Discount).all()
     total_sales =  db.session.query(db.func.sum(Sale.Total)).filter(Sale.Date>=start_date,Sale.Date<=end_date, Sale.Status=="paid").scalar()  
     return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date,total_sales=total_sales)
 
@@ -235,9 +235,10 @@ def update_sale_Total(id):
 def get_sale_detail():
     date = request.args.get('date')
     sales = Sale.query.filter(Sale.Date == date,Sale.Status == "paid").all()
-    sales = db.session.query((User.Last_Name + ' ' +User.First_Name).label('Person_Name'),Product.Name,Sale_Item.Quantity,Sale_Item.SalePrice).filter(Inventory.id == Sale_Item.Inventory_id,Inventory.Product_id == Product.id,User.id == Sale.Staff_id,Sale.Date == date).order_by(Sale.Date).all()
+    sales = Sale.query.filter(Sale.Date == date,Sale.Status=='paid').order_by(Sale.Date).all()
+    users = User.query.all()
     products = Product.query.all()
     
     # print(product)
-    return render_template('sales/saledetail.html',sales = sales,products=products,date = date)
+    return render_template('sales/saledetail.html',sales = sales,products=products,users=users,date = date,str=str)
 

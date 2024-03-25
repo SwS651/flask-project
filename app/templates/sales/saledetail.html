@@ -27,7 +27,8 @@
 <div class="table-container">
     <h3>Sale Items</h3>
     {% for sale in sales %}
-                {{sale.Date}} | {{sale.Staff_id}}
+    {{sale.Date}} | 
+    {% for user in users %} {% if str(user.id) == sale.Staff_id %}{{user.Last_Name}}{% endif %} {% endfor %}{{sale.Staff_id}}
     <table>
         <thead>
             <tr>
@@ -39,10 +40,22 @@
             </tr>
         </thead>
         <tbody>
-            
-            
-        </tbody>
-    </table>
+                {% for item in sale.Sale_items %}
+                <tr>
+                    <td>
+                        {% for product in products %}
+                        {% for inventory in product.Inventories %}
+                        {% if inventory.id == item.Inventory_id%}
+                        {{product.Name}}
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                
+                {% endfor %}
+            </tbody>
+        </table>
     {% endfor %}
 </div>
 {% endblock  %}
