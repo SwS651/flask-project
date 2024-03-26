@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+
+{% block nav_title %}
+Products
+{% endblock %}
 {% block css_style %}
 
 <link rel="stylesheet" href="{{url_for('static',filename='css/flex.css')}}">
@@ -17,6 +21,7 @@
         {% endfor %}
     </ul>
 {% endfor %}
+<a href="{{url_for('product.index')}}"><b>Go Back</b></a><br><br>
 <div class="flex flex-between-center">
     <div class="">
         {% for role in current_user.roles if role.name == 'admin' %}
@@ -93,49 +98,45 @@
         <tbody>
             {% for product in products %}
             <tr>
-                <form method="POST" action="{{url_for('product.quick_edit',barcode = product.BarCode)}}"
-                    style="display: inline-block;">
-                    {{ form.hidden_tag() }}
-                    <td>
-                        <span><a href="{{url_for('product.get_product',barcode = product.BarCode)}}">{{ product.BarCode
-                                }}</a></span>
-                        {{ form.barcode(style="display:none", value=product.BarCode) }}
-                    </td>
-                    <td>
-                        <span><a href="{{url_for('product.get_product',barcode = product.BarCode)}}">{{ product.Name
-                                }}</a></span>
 
-                        {{ form.name(style="display:none", value=product.Name) }}
-                    </td>
-                    <td>
-                        {{display_categories(product)}}
-                    </td>
-                    <td>
-                        <span>{{ product.Safety_quantity }}</span>
-                        {{ form.safety_quantity(style="display:none", value=product.Safety_quantity) }}
-                    </td>
-                    <td>
-                        <span>{{ product.Status }}</span>
-                    </td>
+                <td>
+                    <span><a href="{{url_for('product.get_product',id = product.id)}}">{{ product.BarCode}}</a></span>
+                    {{ form.barcode(style="display:none", value=product.BarCode) }}
+                </td>
+                <td>
+                    <span><a href="{{url_for('product.get_product',id = product.id)}}">{{ product.Name
+                            }}</a></span>
 
-                    <td>
-                        <button type="button" class="button info" id="edit" href="javascript:;"><i
-                                class='bx bx-edit'></i></button>
-                        <button type="submit" class="button success" id="update" onclick="changeFormAction(this)"
-                            style="display: none;"><i class='bx bx-check'></i></button>
-                        <button type="button" class="button info" id="cancel" href="javascript:;"
-                            style="display: none;"><i class='bx bx-x'></i></button>
+                    {{ form.name(style="display:none", value=product.Name) }}
+                </td>
+                <td>
+                    {{display_categories(product)}}
+                </td>
+                <td>
+                    <span>{{ product.Safety_quantity }}</span>
+                    {{ form.safety_quantity(style="display:none", value=product.Safety_quantity) }}
+                </td>
+                <td>
+                    <span>{{ product.Status }}</span>
+                </td>
 
-                </form>
-                {% for role in current_user.roles if role.name == 'admin' %}
-                <form method="GET" action="{{ url_for('product.delete_product', id=product.id) }}"
-                    style="display: inline-block;">
-                    {{ form.hidden_tag() }}
-                    <button id="delete" class="button error" type="submit"
-                        onclick="return confirm('Are you sure you want to delete this item? Product will be deleted along with the inventories! ')"><i
-                            class='bx bx-trash-alt'></i></button>
-                </form>
-                {% endfor %}
+                <td>
+                    <button type="button" class="button info" id="edit" href="javascript:;"><i
+                            class='bx bx-edit'></i></button>
+                    <button type="submit" class="button success" id="update" onclick="changeFormAction(this)"
+                        style="display: none;"><i class='bx bx-check'></i></button>
+                    <button type="button" class="button info" id="cancel" href="javascript:;"
+                        style="display: none;"><i class='bx bx-x'></i></button>
+
+                    {% for role in current_user.roles if role.name == 'admin' %}
+                    <form method="GET" action="{{ url_for('product.delete_product', id=product.id) }}"
+                        style="display: inline-block;">
+                        {{ form.hidden_tag() }}
+                        <button id="delete" class="button error" type="submit"
+                            onclick="return confirm('Are you sure you want to delete this item? Product will be deleted along with the inventories! ')"><i
+                                class='bx bx-trash-alt'></i></button>
+                    </form>
+                    {% endfor %}
                 </td>
             </tr>
             {% endfor %}

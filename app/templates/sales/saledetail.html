@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block nav_title %} Sales Overview > <a href="{{url_for('sale.get_sale_detail',date = date)}}">Sales</a>{% endblock %}
 {% block css_style %} 
 
     <link rel="stylesheet" href="{{url_for('static',filename='css/grid.css')}}"> 
@@ -68,7 +69,7 @@
                         {{item.Quantity}}
                     </td>
                     <td>
-                        {{item.SalePrice}}
+                        {{"%.2f"|format(item.SalePrice)}}
                     </td>
                     <td>
                         {% for user in users %} {% if str(user.id) == sale.Staff_id %}{{user.Last_Name}}{% endif %} {% endfor %}{{sale.Staff_id}}

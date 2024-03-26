@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block nav_title %} Dashboard Overview {% endblock %}
 {% block nav_dashboard %}active{% endblock %}
 {% block css_style %}
     <link rel="stylesheet" href="{{url_for('static',filename='css/cards.css')}}"> 
@@ -218,7 +219,7 @@
                     <i class='bx bx-objects-vertical-top'></i>
                     <div class="card-text">
                         <p>Cost of Inventory</p>
-                        <span>RM {{product_count['total_inventory_cost']}}</span>
+                        <span>RM {{"%.2f"|format(product_count['total_inventory_cost'])}}</span>
                     </div>
                 </div>
             </div>

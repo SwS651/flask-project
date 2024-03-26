@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% block nav_title %} Staff Overview {% endblock %}
 
 {% block css_style %} 
 
@@ -24,7 +24,7 @@
 {% endfor %}
 {% endif %}
 
-
+<a href="{{url_for('main.role_management')}}"><b style="text-decoration: underline;">Role Management</b></a><br><br>
 <div class="flex flex-between-center">
     <a href="{{url_for('user.create_staff')}}" class="button success">Create</a>
     <form action="{{url_for('user.search_staff')}}" method="get" class="flex flex-start-center">

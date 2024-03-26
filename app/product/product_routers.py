@@ -66,24 +66,25 @@ def products_by_category(category_name):
         return "Category not found", 404
 
 
-@bp.route('/<barcode>/', methods=['GET'])
+@bp.route('/<int:id>', methods=['GET'])
 @login_required
-def get_product(barcode):
+def get_product(id):
 
-    if barcode:
-        product = db.one_or_404(db.select(Product).filter_by(BarCode=barcode))
-        suppliers = Supplier.query.all()
-        inventories = product.Inventories
-        categories = Category.query.all()
-        form = CreateProductForm(obj=product)
-        form.categories.choices = [(category.id, category.Name) for category in Category.query.all()]
+    if not id:
+        id = request.args.get('id')
+    product = db.one_or_404(db.select(Product).filter(Product.id == id))
+    suppliers = Supplier.query.all()
+    inventories = product.Inventories
+    categories = Category.query.all()
+    form = CreateProductForm(obj=product)
+    form.categories.choices = [(category.id, category.Name) for category in Category.query.all()]
 
-        inventoryForm = InventoryForm()
-        inventoryForm.supplier.choices = [(supplier.id,supplier.Name) for supplier in suppliers]
-        return render_template('product/detail.html', product=product,categories = categories,inventories = inventories,suppliers=suppliers,form = form,inventoryForm=inventoryForm)
+    inventoryForm = InventoryForm()
+    inventoryForm.supplier.choices = [(supplier.id,supplier.Name) for supplier in suppliers]
 
-    else:
-        return redirect(url_for('product.index'))
+    return render_template('product/detail.html', product=product,categories = categories,inventories = inventories,suppliers=suppliers,form = form,inventoryForm=inventoryForm)
+
+   
 
 
 @bp.route('/search/', methods=['GET'])
@@ -166,10 +167,12 @@ def quick_edit(barcode):
 
 
 
-@bp.route('/<barcode>/edit', methods=['GET', 'POST'])
+@bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edit_product(barcode):
-    product = Product.query.filter_by(BarCode=barcode).first_or_404()
+def edit_product(id):
+    if not id:
+        id = request.args.get('id')
+    product = Product.query.filter_by(id = id).first_or_404()
     categories = Category.query.all()
     suppliers = Supplier.query.all()
     form = CreateProductForm(obj=product)

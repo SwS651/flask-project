@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block nav_title %} Supplier Overview > <a href="{{url_for('supplier.get_supplier',id = supplier.id)}}">Supplier</a>{% endblock %}
 {% block css_style %}
     <link rel="stylesheet" href="{{url_for('static',filename='css/grid.css')}}"> 
     <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 

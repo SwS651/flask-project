@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% block nav_title %}Products Overview{% endblock %} 
+<!-- NOt USE -->
 {% block css_style %} 
     <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
     <style>
@@ -56,7 +58,7 @@
             <tbody>
                 {% for product in products %}
                     <tr>
-                        <form method="POST" action="{{ url_for('product.edit_product', barcode=product.BarCode) }}" style="display: inline-block;">
+                        <form method="POST" action="{{ url_for('product.edit_product', id=product.id) }}" style="display: inline-block;">
                             <td>
                                 <span>{{ product.BarCode }}</span>
                                 <input type="text" style="display: none;" name="barcode" id="barcode" value="{{ product.BarCode }}" required>
@@ -74,7 +76,7 @@
                                 <input type="number" style="display: none;" name="quantity" id="quantity" value="{{ product.Quantity }}" min=0 required>
                             </td>
                             <td>
-                                <span>{{ product.RetailPrice }}</span>
+                                <span>{{ "%.2f"|format(product.RetailPrice) }}</span>
                                 <input type="number" style="display: none;" name="retail_price" id="retail_price" value="{{ product.RetailPrice }}" step=0.01 min=0 required>
                             </td>
     

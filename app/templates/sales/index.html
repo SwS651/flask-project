@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block nav_title %} Sales Overview {% endblock %}
 {% block css_style %} 
 
     <link rel="stylesheet" href="{{url_for('static',filename='css/flex.css')}}"> 
@@ -30,7 +31,7 @@
 
                            <td>{{record.Staff_id}}</td>
                            <td>{{record.Name}}</td>
-                           <td>{{record.Total_Amount}}</td>
+                           <td>{{"%.2f"|format(record.Total_Amount)}}</td>
                         </tr>
                        {% endfor %}
                     </tbody>
@@ -47,8 +48,7 @@
                         <tr>
                            <th>Product</th>
                            <th>Quantity</th>
-                           <th>Retail Price</th>
-                           <th>Total</th>
+                           
                         </tr>
                     </thead>
                     <tbody>
@@ -56,9 +56,7 @@
                             <tr>
                                 <td>{{product.Name}}</td>
                                 <td>{{ product.Quantity }}</td>
-                                <td>
-                                  
-                                </td>
+                                
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -86,7 +84,7 @@
                 </div>
                 <div class="">
                     <p style="font-size: 1.5rem;">
-                        Total Sales: RM {{total_sales}}
+                        Total Sales: RM {{"%.2f"|format(total_sales)}}
                     </p>
                 </div>
             </div>
@@ -109,7 +107,7 @@
                 <td>{{sale.Date}}</td>
                 <td>{{sale.Discount}}</td>
                 <td>{{sale.Type_Payment}}</td>
-                <td>{{sale.Total}}</td>
+                <td>{{"%.2f"|format(sale.Total)}}</td>
                 <td>{{sale.Status}}</td>
                 {% if sale.Status == "draft" %}
                 <td><a href="{{url_for('sale.show_checkout_page')}}">Edit</a></td>

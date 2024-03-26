@@ -135,7 +135,7 @@ def add_sale_item():
                 db.session.add(sale_item)
             inventory.Available_QTY -= 1
             inventory.Locked_QTY +=1
-            db.session.commit()
+        db.session.commit()
 
     return redirect(url_for('sale.show_checkout_page'))
 
@@ -148,6 +148,7 @@ def remove_sale_item_from_checkout(item):
         sale_item.Quantity -= 1
     else:
         db.session.delete(sale_item)
+        db.session.commit()
     inventory = Inventory.query.get_or_404(sale_item.Inventory_id)
     inventory.Available_QTY += 1
     inventory.Locked_QTY -= 1
@@ -200,13 +201,13 @@ def finalize_checkout(id):
         sale.Total = "%.2f" % total
         sale.Status = "paid"
         db.session.commit()
-    sale_item = Sale_Item.query.filter(Sale_Item.Report_id == sale.id).first()
+    sale_items = Sale_Item.query.filter(Sale_Item.Report_id == sale.id).all()
     
-    inventory = Inventory.query.filter(Inventory.id == sale_item.Inventory_id).first()
-    inventory.Sold_QTY += sale_item.Quantity
-    inventory.Locked_QTY -= sale_item.Quantity
+    for sale_item in sale_items:
+        inventory = Inventory.query.filter(Inventory.id == sale_item.Inventory_id).first()
+        inventory.Sold_QTY += sale_item.Quantity
+        inventory.Locked_QTY -= sale_item.Quantity
     db.session.commit()
-    print(inventory)
 
     insert_to_cashflow(
         particular=f'Sales ({sale.Type_Payment})',

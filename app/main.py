@@ -9,17 +9,17 @@ from datetime import date, datetime, timedelta
 from app.models.cashflow import Cashflow
 from app.models.supplier import Supplier
 from app.models.category import Category
-from app.models.user import User
+from app.models.user import Role, User
 from app.models.product import Product,Inventory
 from app.models.supplier import Supplier
 from app.models.sale import Sale,Sale_Item
-
+from flask_principal import Permission,RoleNeed
 
 from flask import send_file
 from fpdf import FPDF
 main = Blueprint('main', __name__)
 
-
+admin_permission = Permission(RoleNeed('admin'))
 @main.route('/imexport')
 @login_required
 def imexport_overview():
@@ -245,7 +245,7 @@ def generate_inventory_report():
     pdf.set_font("helvetica", size=8)
     pdf.set_xy(150,25)
     pdf.cell(22, 10, "COST AMOUNT: ")
-    pdf.cell(20, 10, f"RM {total_amount}")
+    pdf.cell(20, 10, f"RM {total_amount:.2f}")
     pdf.ln()
 
     pdf.ln()
@@ -294,3 +294,38 @@ def generate_inventory_report():
     pdf.output(pdf_bytes)
     pdf_bytes.seek(0)
     return send_file(pdf_bytes, as_attachment=False,download_name='sample1.pdf')
+
+
+
+
+@main.route('/role_management',methods=["GET","POST"])
+@login_required
+@admin_permission.require(http_exception=401)
+def role_management():
+    
+    users = User.query.all()
+    if request.method =="POST":
+        user_ids =request.form.getlist('user_id')
+        admin_roles = request.form.getlist('admin_roles')
+        staff_roles = request.form.getlist('staff_roles')
+        print(user_ids)
+        print(admin_roles)
+        print(staff_roles)
+        for id in user_ids:
+            user = User.query.filter_by(id = int(id)).first()
+            print('user: ',user.id)
+            user_id = user.id
+            user.roles.clear()
+            if str(user_id) in admin_roles:
+                role = Role.query.filter_by(id=1).first()
+                user.roles.append(role)
+                db.session.commit()
+
+            if str(user_id) in staff_roles:
+                role = Role.query.filter_by(id=2).first()
+                user.roles.append(role)
+                db.session.commit()
+            
+            
+
+    return render_template('/admin/role_management.html',users = users)

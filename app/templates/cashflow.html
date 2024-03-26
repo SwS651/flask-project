@@ -30,9 +30,9 @@
             <tr>
                 <td>{{row.date}}</td>
                 <td>{{row.particulars}}</td>
-                <td>{{row.debit}}</td>
-                <td>{{row.credit}}</td>
-                <td>{{row.balance}}</td>
+                <td>{{"%.2f"|format(row.debit)}}</td>
+                <td>{{"%.2f"|format(row.credit)}}</td>
+                <td>{{"%.2f"|format(row.balance)}}</td>
 
                 <td>{% if row.particulars != "balance b/f" %}<a href="{{url_for('cashflow.record_detail',id=row.id)}}">view</a> {% endif %}</td>
             </tr>
