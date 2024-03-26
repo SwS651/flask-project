@@ -53,6 +53,8 @@
             </div>
         </div>
         <br>
+        {% for role in current_user.roles if role.name == 'admin' %}
+        
         <div class="card">
             <div class="card-header">
                 <div class="flex flex-between-center">
@@ -91,6 +93,7 @@
                 </form>
             </div>
         </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

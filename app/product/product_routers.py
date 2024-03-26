@@ -109,6 +109,7 @@ def search_product():
     
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
+@admin_permission.require(http_exception=401)
 def create_product():
     form = CreateProductForm()
     categories = Category.query.all()

@@ -95,7 +95,7 @@ def generate_sales_report():
     pdf.set_xy(150,30)
     pdf.cell(22, 8, "SALES TOTAL: ")
     pdf.set_font("helvetica", size=8,style='B')
-    pdf.cell(22, 8, f"{total_amount}")
+    pdf.cell(22, 8, f"{total_amount:.2f}")
 
     pdf.ln()
     pdf.ln()
@@ -122,12 +122,12 @@ def generate_sales_report():
         # Table data
         pdf.cell(25, 5, f"{product.BarCode}", border=1,align='CENTER')
         pdf.cell(40, 5, product.Name, border=1)
-        pdf.cell(20, 5, f"{product.SalePrice}", border=1,align='CENTER')
+        pdf.cell(20, 5, f"{product.SalePrice:.2f}", border=1,align='CENTER')
         pdf.cell(13, 5, f"{product.Quantity}", border=1,align='CENTER')
         pdf.cell(25, 5, product.Type_Payment, border=1,align='CENTER')
-        pdf.cell(20, 5, f"{product.SalePrice * product.Quantity}", border=1,align='CENTER')
-        pdf.cell(20, 5, f"{np.round(((product.SalePrice * product.Quantity)*product.Discount/100),2)}", border=1,align='CENTER')
-        pdf.cell(23, 5, f"{price_after_discount}", border=1,align='CENTER')
+        pdf.cell(20, 5, f"{(product.SalePrice * product.Quantity):.2f}", border=1,align='CENTER')
+        pdf.cell(20, 5, f"{np.round(((product.SalePrice * product.Quantity)*product.Discount/100),2):.2f}", border=1,align='CENTER')
+        pdf.cell(23, 5, f"{price_after_discount:.2f}", border=1,align='CENTER')
 
         pdf.ln()
     pdf.set_fill_color(200,200,200)
@@ -178,22 +178,21 @@ def generate_cashflow_report():
     # Table Header
     pdf.cell(35, 7, 'Date', border=1, fill=True,align='CENTER')
     # pdf.cell(50, 7, 'StockI', border=1, fill=True,align='CENTER')
-    pdf.cell(50, 7, 'Particulars', border=1, fill=True,align='CENTER')
-    pdf.cell(20, 7, 'Debit', border=1, fill=True,align='CENTER')
-    pdf.cell(20, 7, 'Credit', border=1, fill=True,align='CENTER')
-    pdf.cell(20, 7, 'Balance', border=1, fill=True,align='CENTER')
-    pdf.cell(40, 7, 'Remarks', border=1, fill=True,align='CENTER')
+    pdf.cell(60, 7, 'Particulars', border=1, fill=True,align='CENTER')
+    pdf.cell(30, 7, 'Debit', border=1, fill=True,align='CENTER')
+    pdf.cell(30, 7, 'Credit', border=1, fill=True,align='CENTER')
+    pdf.cell(30, 7, 'Balance', border=1, fill=True,align='CENTER')
+    
 
     pdf.ln()
-
     # Table data
     for c in cashflow:
+
         pdf.cell(35, 7, f'{c.date}', border=1,align='CENTER')
-        pdf.cell(50, 7, f'{c.particulars}', border=1,align='CENTER')
-        pdf.cell(20, 7, f'{c.debit}', border=1,align='CENTER')
-        pdf.cell(20, 7, f'{c.credit}', border=1,align='CENTER')
-        pdf.cell(20, 7, f'{c.balance}', border=1,align='CENTER')
-        pdf.cell(40, 7,f'{c.remarks}', border=1)
+        pdf.cell(60, 7, f'{c.particulars}', border=1,align='CENTER')
+        pdf.cell(30, 7, f'{c.debit:.2f}', border=1,align='CENTER')
+        pdf.cell(30, 7, f'{c.credit:.2f}', border=1,align='CENTER')
+        pdf.cell(30, 7, f'{c.balance:.2f}', border=1,align='CENTER')
 
         pdf.ln()
 

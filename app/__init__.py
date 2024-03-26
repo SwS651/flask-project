@@ -10,7 +10,7 @@ from app.extensions import db
 from app.models.supplier import Supplier
 from app.models.category import Category
 from app.models.user import User
-from app.models.product import Product,Inventory
+from app.models.product import Product,Inventory,LostReport
 from app.models.supplier import Supplier
 from app.models.sale import Sale,Sale_Item
 from app.models.cashflow import Cashflow

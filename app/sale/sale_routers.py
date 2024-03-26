@@ -1,5 +1,4 @@
 from datetime import datetime,date, timedelta
-
 from flask_login import current_user, login_required
 
 from app.cashflow.routes import insert_to_cashflow
@@ -234,7 +233,7 @@ def update_sale_Total(id):
 @login_required
 def get_sale_detail():
     date = request.args.get('date')
-    sales = Sale.query.filter(Sale.Date == date,Sale.Status == "paid").all()
+    # sales = Sale.query.filter(Sale.Date == date,Sale.Status == "paid").all()
     sales = Sale.query.filter(Sale.Date == date,Sale.Status=='paid').order_by(Sale.Date).all()
     users = User.query.all()
     products = Product.query.all()

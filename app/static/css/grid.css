@@ -28,7 +28,7 @@
 
   /* Example styling for grid items */
   .grid-item {
-    padding: 20px;
+    /* padding: 20px; */
     /* border: 1px solid #ccc; */
   }
 
@@ -40,5 +40,14 @@
   @media screen and (max-width: 768px) {
     .grid-container {
       grid-template-columns: 1fr; /* Single column for small screens */
+    }
+  }
+
+  @media screen and (max-width: 550px) {
+    .grid-container div {
+      grid-template-columns: 1fr; /* Single column for small screens */
+    }
+    .four-two-grid div{
+      grid-column: span 6 !important; /* 4/6 and 2/6 column sizes */
     }
   }

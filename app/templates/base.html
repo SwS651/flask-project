@@ -35,7 +35,6 @@
                     <div class="menu">
                         <ul class="menu-links">
                             <li class="menu-link {% block nav_dashboard %}{% endblock %}"><i class='nav-icon bx bx-home'></i><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                            <li class="menu-link {% block nav_staff %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('user.index') }}">Staff</a></li>
                             <li class="menu-link {% block nav_inventory %}{% endblock %}"><i class='nav-icon bx bxs-package'></i><a href="{{ url_for('product.index') }}">Products</a></li>
                             <li class="menu-link {% block nav_category %}{% endblock %}"><i class='nav-icon bx bxs-category' ></i><a href="{{ url_for('category.index') }}">Category</a></li>
                             <li class="menu-link {% block nav_supplier %}{% endblock %}"><i class='nav-icon bx bxs-buildings' ></i><a href="{{ url_for('supplier.index') }}">Supplier</a></li>
@@ -43,6 +42,9 @@
                             <li class="menu-link {% block nav_checkout %}{% endblock %}"><i class='nav-icon bx bx-dollar-circle' ></i><a href="{{ url_for('sale.show_checkout_page') }}">Check Out</a></li>
                             <li class="menu-link {% block nav_cashflow %}{% endblock %}"><i class='nav-icon bx bx-book-content'></i><a href="{{url_for('cashflow.index')}}">Cash Flow</a></li>
                             <li class="menu-link {% block nav_ImExport %}{% endblock %}"><i class='nav-icon bx bx-transfer'></i><a href="{{url_for('main.imexport_overview')}}">Import & Export</a></li>
+                            {% for role in current_user.roles if role.name == 'admin' %}
+                                <li class="menu-link {% block nav_staff %}{% endblock %}"><i class='nav-icon bx bxs-group' ></i><a href="{{ url_for('user.index') }}">Staff</a></li>
+                            {% endfor %}
                             <li class="menu-link {% block nav_profile %}{% endblock %}"><i class='nav-icon bx bx-user-circle'></i><a href="{{url_for('user.get_staff',id=current_user.id)}}">Profile</a></li>
                         </ul>
                     </div>

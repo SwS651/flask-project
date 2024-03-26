@@ -9,7 +9,8 @@ from app import db
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, IntegerField, PasswordField, RadioField, SelectField, StringField, ValidationError
 from wtforms.validators import InputRequired,Email, Length, EqualTo,NumberRange,DataRequired
-
+from flask_principal import Permission,RoleNeed
+admin_permission = Permission(RoleNeed('admin'))
 class CreateStaffForm(FlaskForm):
     id =  StringField('Staff ID', validators=[InputRequired()])
     first_name = StringField('First Name', validators=[InputRequired(), Length(max=100)])
@@ -43,6 +44,7 @@ class EditStaffForm(FlaskForm):
 
 @bp.route('/')
 @login_required
+@admin_permission.require(http_exception=401)
 def index():
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('q', '')
@@ -56,6 +58,7 @@ def index():
 
 @bp.route('/add', methods=['GET','POST'])
 @login_required
+@admin_permission.require(http_exception=401)
 def create_staff():
     form = CreateStaffForm()
     
@@ -111,6 +114,7 @@ def get_staff(id):
 
 @bp.route('/<int:id>/delete', methods=['POST'])
 @login_required
+@admin_permission.require(http_exception=401)
 def delete_staff(id):
     staff = User.query.get_or_404(id)
     db.session.delete(staff)
@@ -164,5 +168,5 @@ def change_password():
 @login_required
 def search_staff():
     keyword = request.args.get('q','')
-    staffs = User.query.filter(db.or_(User.StaffID.ilike(f'%{keyword}%'), User.Last_Name.ilike(f'%{keyword}%'),User.First_Name.ilike(f'%{keyword}%')))
+    staffs = User.query.filter(db.or_(User.StaffID.ilike(f'%{keyword}%'), User.Last_Name.ilike(f'%{keyword}%'),User.First_Name.ilike(f'%{keyword}%'))).all()
     return render_template('admin/staff_management.html', staffs=staffs)

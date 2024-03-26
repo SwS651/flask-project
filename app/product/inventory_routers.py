@@ -24,7 +24,12 @@ class InventoryForm(FlaskForm):
     cost_per_item = DecimalField('Cost Per Item', validators=[InputRequired(), NumberRange(min=0)])
     retail_price = DecimalField('Retail Price', validators=[InputRequired(), NumberRange(min=0)])
 
-    
+@bp.route('/inventory/', methods=['GET'])
+def inventory_detail():
+    id = request.args.get('inventory',None,int)
+    inventory = Inventory.query.filter(Inventory.id == id).first()
+    suppliers = Supplier.query.all()
+    return render_template('/product/inventory_detail.html',inventory = inventory,suppliers=suppliers)
 
 @bp.route('/<barcode>/inventory/create', methods=['POST'])
 @login_required

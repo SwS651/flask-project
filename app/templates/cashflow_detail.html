@@ -42,11 +42,13 @@
         <p>Remarks: <span>{{cashflow.remarks}}</span></p>
     </div>
     <div class="card-bottom flex flex-end-center">
-        <a href="{{url_for('cashflow.delete_cashflow',cashflow_id = cashflow.id)}}" style="color: red;">Delete record</a>
+        {% for role in current_user.roles if role.name == 'admin' %}<a href="{{url_for('cashflow.delete_cashflow',cashflow_id = cashflow.id)}}" style="color: red;">Delete record</a>{% endfor %}
     </div>
         
 </div>
 <br>
+{% for role in current_user.roles if role.name == 'admin' %}
+
 <div class="card">
     <div class="card-header">
         <h4 style="text-align: center;"><b>UPDATE </b>FORM</h4>
@@ -83,9 +85,10 @@
                 <br>
                 <input class="button info" type="submit" value="Change Time" id="btn-changetime" disabled>
             </form>
+        </div>
     </div>
 </div>
-</div>
+{% endfor %}
 {% endblock %}
 
 

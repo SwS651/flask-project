@@ -13,6 +13,8 @@
 {% block nav_staff %}active{% endblock %}
 {% block content %}
 
+
+{% if form %}
 {% for field, errors in form.errors.items() %}
     <ul class="errors">
         {% for error in errors %}
@@ -20,6 +22,7 @@
         {% endfor %}
     </ul>
 {% endfor %}
+{% endif %}
 
 
 <div class="flex flex-between-center">

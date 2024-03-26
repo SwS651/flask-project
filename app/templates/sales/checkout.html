@@ -74,8 +74,9 @@
                     {% if sale %}
                     {% set counter = 0 %}
                     {% for item in sale.Sale_items %}
+                    {% set counter = counter + 1 %}
                     <tr>
-                        <td>{{ counter+1 }}</td>
+                        <td>{{ loop.index }}</td>
                         <td>
                             {% for product in products %}
                             {% for inventory in product.Inventories %}
@@ -88,11 +89,11 @@
                         </td>
                         <td>{{ item.Quantity }}</td>
                         <td>
+
                             {{ item.SalePrice }}
                         </td>
                         <td><a href="{{url_for('sale.remove_sale_item_from_checkout',item = item.id)}}"><i class='bx bx-minus'></i></a></td>
                     </tr>
-                    {% set counter = counter + 1 %}
                     {% endfor %}
                     {% endif %}
                 </table>

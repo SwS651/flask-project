@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block css_style %}
+
+<link rel="stylesheet" href="{{url_for('static',filename='css/flex.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='css/grid.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='css/card.css')}}">
+<style>
+    .card{
+        justify-content: normal !important;
+    }
+</style>
+{% endblock %}
+{% block nav_inventory %}active{% endblock %}
+{% block content %}
+<div class="grid four-two-grid">
+
+    <div class="card">
+        <div class="card-header">Detail</div>
+        <div class="card-contents">
+            <div class="">
+
+                <p>StockIn ({{inventory.StockInDate}}) </p><br>
+                <p>Expire Date ({{inventory.ExpiryDate}})</p><br>
+                <p>Init_QTY ({{inventory.Init_QTY}})  |  Available_QTY ({{inventory.Available_QTY}})  |  Locked_QTY ({{inventory.Locked_QTY}})  |  Lost_QTY ({{inventory.Lost_QTY}})  |  Sold_QTY ({{inventory.Sold_QTY}})</p><br>
+                <p>RM 0.00 per Item</p><br>
+                <p>Sales Price: RM 0.00</p><br>
+                <p>Supplier: xxx</p>
+                <br>
+            </div>
+            <div class="">
+                <h3 style="text-align: center;">Lost Report</h3>
+                <table>
+                    <tr>
+                        <th>Date</th>
+                        <th>Particular</th>
+                        <th>QTY</th>
+                        <th>Remark</th>
+                    </tr>
+
+                    <tr>
+                        <td></td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+        <div class="card-bottom flex flex-end-center">
+            {% for role in current_user.roles if role.name == 'admin' %}<a href="{{url_for('cashflow.delete_cashflow',cashflow_id = inventory.id)}}" style="color: red;">Delete Inventory</a>{% endfor %}
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            
+            <div class="flex flex-between-center">
+                <h3 id="switch-text">Edit Form</h3>
+                <i class='bx bx-transfer' id="switch-btn" style="cursor: pointer;"></i>
+            </div>
+        </div>
+        <div class="card-contents">
+            <form action="" id="edit-form" method="post">
+                <select name="supplier" id="supplier" required>
+                    {% for su in suppliers %}
+                    <option value="{{su.id}}" {% if su.id == inventory.Supplier_id %} selected {% endif %}>{{su.Name}}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="date">StockIn Date</label>
+                <input type="date" name="new_stockin" id="" required>
+                <label for="date">Expiry Date</label>
+                <input type="date" name="new_expiry" id="" required>
+                
+                <label for="costperitem">Cost Per Item</label>
+                <input type="number" name="costperitem" value="0" min="0.00" step="0.01" required>    
+                <label for="particulars">Sales Price</label>
+                <input type="number" placeholder="sales price" name="salesprice" value="0" min="0.00" step="0.01" required>
+
+                <label for="init_QTY">Init QTY</label>
+                <input type="number" placeholder="sales price" name="init_qty" value="0" min="0.00" step="0.01" required>
+                <label for="Available_QTY">Available QTY</label>
+                <input type="number" placeholder="sales price" name="available_qty" value="0" min="0.00" step="0.01" required>
+                <label for="Locked_QTY">Locked QTY</label>
+                <input type="number" placeholder="sales price" name="locked_qty" value="0" min="0.00" step="0.01" required>
+                <label for="Sold_QTY">Sold QTY</label>
+                <input type="number" placeholder="sales price" name="sold_qty" value="0" min="0.00" step="0.01" required>
+                <label for="Lost_QTY">Lost QTY</label>
+                <input type="number" placeholder="sales price" name="lost_qty" value="0" min="0.00" step="0.01" required>
+                
+                <input type="submit" value="Edit">
+            </form>
+
+            <form action=""  id="report-form" method="post" style="display: none;">
+                <input type="hidden" name="barcode" value="1232112">
+                <label for="particular">Particular</label>
+                <select name="particular" id="particular">
+                    <option value="Items Lost">Items Lost</option>
+                    <option value="Items Expired">Items Expired</option>
+                    <option value="Items Damaged">Items Damaged</option>
+                    <option value="Other">Other (Please fill in the remarks)</option>
+                </select>
+                <!-- <label for="choice_inventory">Inventory</label>
+                <select name="Inventory" id="">
+                    <option value="1">Inventory 1 (StockIn: 2024-24-22) RM:2.5</option>
+                </select> -->
+                <label for="qty">qty</label>
+                <input type="number" name="loss_qty" id="" value="0" min="0" step="1" required>
+                <label for="remark">Remark</label>
+                <textarea name="remark" id="" rows="10" required></textarea>
+                <input type="submit" value="Submit">
+            </form>
+
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block jscontent %}
+
+<script>
+
+    // document.getElementById('date').valueAsDate = new Date();
+
+    document.getElementById('switch-btn').addEventListener('click',()=>{
+        var addform = document.getElementById('edit-form')
+        var insertform = document.getElementById('report-form')
+        var title = document.getElementById('switch-text')
+
+        if (insertform.style.display === "none") {
+            insertform.style.display = "block";
+            addform.style.display = "none";
+            title.innerText = "Report Form"
+        } else {
+            insertform.style.display = "none";
+            addform.style.display = "block";
+            title.innerText = "Edit Form"
+        }
+    })
+</script>
+
+{% endblock %}

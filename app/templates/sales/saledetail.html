@@ -5,7 +5,9 @@
     <link rel="stylesheet" href="{{url_for('static',filename='css/table.css')}}"> 
     <link rel="stylesheet" href="{{url_for('static',filename='css/form.css')}}"> 
     <link rel="stylesheet" href="{{url_for('static',filename='css/modal.css')}}"> 
+    <style>
 
+    </style>
 {% endblock %}
 {% block nav_report %}active{% endblock %}
 
@@ -25,24 +27,26 @@
     </div>
 </div>
 <div class="table-container">
-    <h3>Sale Items</h3>
-    {% for sale in sales %}
-    {{sale.Date}} | 
-    {% for user in users %} {% if str(user.id) == sale.Staff_id %}{{user.Last_Name}}{% endif %} {% endfor %}{{sale.Staff_id}}
-    <table>
+    
+    <h3>Sale Items - {{date}}</h3>
+
+    
+    
+    <table >
         <thead>
             <tr>
                 <th>Product Name</th>
                 <th>Inventory ID</th>
                 <th>Quantity</th>
                 <th>Sale Price</th>
+                <th>Sale Person</th>
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody>{% for sale in sales %}
                 {% for item in sale.Sale_items %}
                 <tr>
-                    <td>
+                    <td >
                         {% for product in products %}
                         {% for inventory in product.Inventories %}
                         {% if inventory.id == item.Inventory_id%}
@@ -51,12 +55,33 @@
                         {% endfor %}
                         {% endfor %}
                     </td>
+                    <td>
+                        {% for product in products %}
+                        {% for inventory in product.Inventories %}
+                        {% if inventory.id == item.Inventory_id%}
+                        {{inventory.id}}
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {{item.Quantity}}
+                    </td>
+                    <td>
+                        {{item.SalePrice}}
+                    </td>
+                    <td>
+                        {% for user in users %} {% if str(user.id) == sale.Staff_id %}{{user.Last_Name}}{% endif %} {% endfor %}{{sale.Staff_id}}
+                    </td>
+                    <td>
+                        <a href=""><i class='bx bxs-trash'></i></a>
+                    </td>
                 </tr>
                 
-                {% endfor %}
+                {% endfor %}{% endfor %}
             </tbody>
         </table>
-    {% endfor %}
+    
 </div>
 {% endblock  %}
 

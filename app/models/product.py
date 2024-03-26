@@ -50,3 +50,12 @@ class Inventory(db.Model):
 
     def _repr_(self):
         return f'<Stock "{self.StockInDate}...">'
+    
+
+class LostReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    particulars = db.Column(db.String(255)) 
+    inventory_id = db.Column(db.Integer, db.ForeignKey('inventory.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    qty_lost = db.Column(db.Integer, nullable=False)
+    remark = db.Column(db.String(255), nullable=False)
