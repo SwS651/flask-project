@@ -1,6 +1,7 @@
 from datetime import date, datetime
+import os
 from statistics import mean
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, send_file, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import extract
 
@@ -18,9 +19,28 @@ from app.models.cashflow import Cashflow
 from app.plotly_graphs import *
 from flask_principal import UserNeed,RoleNeed,identity_loaded
 def check_inventory():
-    products_below_safety = Product.query.filter(Product.Safety_quantity > Product.Inventories.any(Inventory.Available_QTY)).all()
+    # products_below_safety = Product.query.filter(Product.Safety_quantity > Product.Inventories.any(Inventory.Available_QTY)).all()
+    products = Product.query.filter(Product.Safety_quantity>=0).all()
+    
+    products_below_safety = db.session.query(Product.id,Product.Name,Product.Safety_quantity,db.func.sum(Inventory.Available_QTY).label('Available_QTY')).filter(Product.id == Inventory.Product_id).group_by(Product.id).having(db.func.sum(Inventory.Available_QTY) < Product.Safety_quantity).all()
+    # Count the number of products below safety line
+    count_below_safety = len(products_below_safety)
+    # products_below_safety = db.session.query(Product).filter(
+    # Product.Safety_quantity > (
+    #     db.session.query(db.func.sum(Inventory.Available_QTY))
+    #     .filter(Inventory.Product_id == Product.id)
+    #     .scalar()
+    # )).all()
+
+    # products_below_safety = (
+    #     db.session.query(Product.Name, db.func.sum(Inventory.Available_QTY).label('Available_QTY'))
+    #     .join(Inventory, Product.id == Inventory.Product_id)
+    #     .group_by(Product.id)
+    #     .having(db.func.sum(Inventory.Available_QTY) < Product.Safety_quantity)
+    #     .all()
+    # )
     print(products_below_safety)
-    return products_below_safety
+    return products_below_safety, count_below_safety
 
 
 
@@ -62,6 +82,9 @@ def create_app(config_class = Config):
     from app.cashflow.routes import bp as cashflow_bp
     app.register_blueprint(cashflow_bp, url_prefix='/cashflow')
     
+    
+
+    app.jinja_env.filters['has_role'] = has_role
         
     @app.route('/')
     @login_required
@@ -70,7 +93,7 @@ def create_app(config_class = Config):
         # categories = Category.query.all()
         # products = Product.query.all()
         # Monthly Profit
-        
+        update_qty_on_expiry()
 
         product_proportion = show_product_proportion_pie()
         sales_graph = show_sales_graph()
@@ -78,7 +101,7 @@ def create_app(config_class = Config):
         vertical_product_bar = show_prodcut_vertical_bar()
         lost_cost_bar = show_product_lost_cost_bar()
 
-        print(check_inventory())
+    
         # Convert the pie chart to JSON format
         product_proportion_pie = product_proportion.to_json()
         sales_graph = sales_graph.to_json()
@@ -87,17 +110,31 @@ def create_app(config_class = Config):
 
         lost_cost_bar =lost_cost_bar.to_json()
         product_count,sale_count,total_supplier,total_staff = all_Model_value_total()
+
+        product_lost = db.session.query(Product.Name,Inventory.Lost_QTY,Inventory.CostPerItem).filter(Inventory.ExpiryDate>=date.today(),Inventory.Lost_QTY>0, Inventory.Product_id == Product.id).group_by(Product.Name).order_by(Product.Name).all()
+        
+        products_below_safety , count_below_safety = check_inventory()
         # total_suppkier = Supplier.query(db.func.sum())
         return render_template('index.html', sales_graph = sales_graph,
                                product_proportion_pie= product_proportion_pie,
                                turnover_bar = turnover_bar,
                                vertical_product_bar=vertical_product_bar,
                                lost_cost_bar = lost_cost_bar,
-                               inventory_warning = check_inventory(),
-                               product_count = product_count,sale_count = sale_count,total_supplier = total_supplier,total_staff = total_staff
+                               inventory_warning = products_below_safety,
+                               count_below_safety = count_below_safety,
+                               product_count = product_count,sale_count = sale_count,total_supplier = total_supplier,total_staff = total_staff,
+                               product_lost = product_lost
         )
     
-
+    @app.route('/template/download')
+    def download_file():
+        template_name = request.args.get('file_name')
+        print(os.pardir)
+        basedir = os.path.abspath(os.path.dirname(__file__))  # Get the absolute path of the current directory
+        project_dir = os.path.abspath(os.path.join(basedir, os.pardir))  # Move one directory up to 'F:\\python project\\project2'
+        file_path = os.path.join(project_dir, f"{template_name}.xlsx")
+        # Replace 'path/to/your/file' with the actual path to your file
+        return send_file(file_path, as_attachment=True)
     
 
 
@@ -150,8 +187,45 @@ def create_app(config_class = Config):
             for role in current_user.roles:
                 identity.provides.add(RoleNeed(role.name))
 
+    from sqlalchemy import event
+    # Define a function to check if a product is expired
+    def check_product_expiry(target, connection, **kwargs):
+        if target.ExpiryDate and target.ExpiryDate <= date.today():
+            print(f"Product '{target.name}' has expired!")
 
     return app
+
+    
+
+
+def update_qty_on_expiry():
+    inventories = Inventory.query.filter(Inventory.ExpiryDate <= date.today(),Inventory.Available_QTY>0).all()
+    if not inventories:
+        return
+    today_date = datetime.strftime(date.today(),'%Y=%m-%d %H:%M:%S')
+    
+    for i in inventories:
+        i.Lost_QTY += i.Available_QTY
+        new_report = LostReport(particulars="Items Expired",
+                                inventory_id=i.id,
+                                date = datetime.strptime(today_date,'%Y=%m-%d %H:%M:%S'),
+                                qty_lost=i.Available_QTY, 
+                                remark=f"Product Items Expired, Expiry Date: {i.ExpiryDate}")
+        i.Available_QTY = 0
+        db.session.add(new_report)
+        db.session.commit()
+
+
+
+
+
+
+
+
+
+def has_role(roles, target_role):
+    return any(role.name == target_role for role in roles)
+
 
 def all_Model_value_total():
     total_supplier = Supplier.query.count()
@@ -164,7 +238,6 @@ def all_Model_value_total():
     in_stock_products = Product.query.filter_by(Status='InStock').count()
     total_sold = db.session.query(db.func.sum(Inventory.Sold_QTY)).scalar()
     total_inventory_cost = db.session.query(db.func.sum(Inventory.CostPerItem * Inventory.Init_QTY)).scalar()
-    below_safety_level_products = Product.query.filter(Product.Safety_quantity!=-1,Product.Safety_quantity > Product.Inventories.any(Inventory.Available_QTY)).count()
     expired_products = Inventory.query.filter(Inventory.ExpiryDate < date.today()).count()
     inventory_lost = db.session.query(db.func.sum(Inventory.Lost_QTY)).scalar()
     lost_cost = db.session.query(db.func.sum(Inventory.CostPerItem * Inventory.Lost_QTY)).scalar()
@@ -194,7 +267,6 @@ def all_Model_value_total():
                      'total_sold':total_sold,
                      'in_stock_products':in_stock_products,
                      'total_inventory_cost': total_inventory_cost,
-                     'below_safety_level_products':below_safety_level_products,
                      'expired':expired_products,
                      'inventory_lost':inventory_lost,
                      'lost_cost':lost_cost
@@ -210,4 +282,4 @@ def all_Model_value_total():
 if __name__ == "__main__":
     app = create_app()
 
-    app.run(debug=True)
+    app.run(port=5001)

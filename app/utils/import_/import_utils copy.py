@@ -1,65 +1,34 @@
-import os
 import pandas as pd
 import numpy as np
 import sqlalchemy
-from app import db, update_qty_on_expiry
-from app.product.inventory_routers import insert_data_to_invenory
-from app.user.routes import insert_data_to_staff
+from app import db
 from app.utils import bp
 from datetime import date, datetime
 
-from flask import Blueprint, flash, render_template, request, redirect, send_file, url_for
-from flask_principal import Permission,RoleNeed
+from flask import Blueprint, flash, render_template, request, redirect, url_for
 
-admin_permission = Permission(RoleNeed('admin'))
 
 @bp.route('/import', methods=['GET'])
-@admin_permission.require(http_exception=401)
 def import_overview(entity = None):
-    update_qty_on_expiry()
+    entity = request.args.get('entity',None)
+
+    if not entity and entity in ["user","product","inventory"]:
+        flash('Entity not found')
+        return redirect(url_for('main.imexport_overview'))
+    
+    return render_template('import_index.html',entity = entity)
+
+@bp.route('/import', methods=['POST'])
+def upload_data(entity = None):
     global temp_ExcelData
     entity = request.args.get('entity',None)
 
-    if not entity and not entity in ["users","product","inventory"]:
+    if not entity and entity in ["user","product","inventory"]:
         flash('Entity not found')
-        print('Could not get entity')
         return redirect(url_for('main.imexport_overview'))
     
-    duplicate_rows =[]
-    first_duplicate_rows =[]
-    repeated_duplicate_rows =[]
-    if not temp_ExcelData.empty or temp_ExcelData is not None:
-        duplicate_rows, first_duplicate_rows, repeated_duplicate_rows = get_duplicate_rows_info(temp_ExcelData)
-    # return render_template('import_index.html',entity = entity,raw_data=temp_ExcelData)
-    return render_template('import_index.html',
-                            column_names=temp_ExcelData.columns.values,
-                            entity = entity,                          
-                            first_duplicate_rows = first_duplicate_rows,    # check only CSV
-                            repeated_rows = repeated_duplicate_rows,        # check only CSV
-                            raw_data=temp_ExcelData, zip=zip, pd=pd)
-
-# clean temp_ExcelData
-@bp.route('/import/clear')
-def clear_tempExcelData():
-    global temp_ExcelData
-    entity = request.args.get('entity',None) 
-    temp_ExcelData = pd.DataFrame()
-    return redirect(url_for('utils.import_overview',entity=entity))
-
-@bp.route('/import', methods=['POST'])
-@admin_permission.require(http_exception=401)
-def upload_data(entity = None):
-    global temp_ExcelData
-    if not entity:
-        entity = request.args.get('entity',None)
-
-    if not entity and not entity in ["users","product","inventory"]:
-        flash('Entity not found')
-        return redirect(url_for('main.imexport_overview'))
-    print(is_dbExist(entity))
     if not is_dbExist(entity):
         return redirect(url_for('main.imexport_overview'))
-    
     try:
         excel_file = request.files['file']
         temp_ExcelData = pd.read_excel(excel_file)
@@ -67,106 +36,8 @@ def upload_data(entity = None):
     except Exception as e:
         print(f"Error reading Excel file: {e}")
 
-    if temp_ExcelData is None:
-        return redirect(url_for('utils.imexport_overview',entity = entity))
     
-    table = db.metadata.tables[entity]
-    duplicate_rows, first_duplicate_rows, repeated_duplicate_rows = get_duplicate_rows_info(temp_ExcelData)
-    
-    column_types = [str(col.type.python_type) for col in table.columns]
-    column_types.pop(0)
-    # if not check_writability_and_print(temp_ExcelData,entity):
-    #     return f"Sorry, CSV does not match to {entity}"
-    table_ = db.metadata.tables[entity]
-    query = db.session.query(table_).all()
-    
-    return render_template('import_index.html',
-                            column_names=temp_ExcelData.columns.values,
-                            entity = entity,                          
-                            first_duplicate_rows = first_duplicate_rows,    # check only CSV
-                            repeated_rows = repeated_duplicate_rows,        # check only CSV
-                            raw_data=temp_ExcelData, zip=zip, pd=pd)
-
-@bp.route('/<string:entity>/file/validate', methods=['POST'])
-@admin_permission.require(http_exception=401)
-def perform_validate(entity):
-    global temp_ExcelData
-    if not is_dbExist(entity): return "Some errors occurred",404
-    if request.method == "POST":
-        temp_ExcelData = data_toDataFrame(request, 'column_names')
-        # temp_ExcelData = down_castDF(temp_ExcelData)
-        print(temp_ExcelData.dtypes)
-        check_duplicate_rows(temp_ExcelData)
-            # info_message += "Data contains duplicate rows, are you sure you want to keep them in the record? "
-
-        #  Step 2:Check for empty values
-        check_empty_values(temp_ExcelData)
-            # info_message += "Warning: There are NaN/Empty values in the DataFrame. Please review the data. (X) \n"
-        # print("before return: ",temp_ExcelData)
-        return redirect(url_for('utils.import_overview',entity = entity))
-
-
-@bp.route('/<string:entity>/file/submit', methods=['POST'])
-@admin_permission.require(http_exception=401)
-def perform_and_insertdata(entity):
-    global temp_ExcelData
-    if not entity:
-        entity = request.args.get('entity')
-
-    if not is_dbExist(entity):
-        print('Here 1')
-        return redirect(url_for('main.imexport_overview'))
-    
-    if entity == "product":
-        insert_data_to_product(entity)
-    elif entity == "inventory":
-        success, error = insert_data_to_invenory(temp_ExcelData)
-        if success:
-            return redirect(url_for("product.index"))
-        else:
-            return f"Error inserting data: {error}"
-    elif entity == "users":
-        success, error = insert_data_to_staff(temp_ExcelData)
-        if success:
-            return redirect(url_for("user.index"))
-        else:
-            return f"Error inserting data: {error}"
-    else:
-        # Handle other entities if needed
-        return "Invalid entity"
-    
-    
-
-def insert_data_to_product(entity):
-    global temp_ExcelData
-    if temp_ExcelData.empty or temp_ExcelData is None:
-        print('Here 2')
-        return redirect(url_for('main.imexport_overview'))
-    table = db.metadata.tables[entity]
-    if check_writability_and_print(temp_ExcelData,entity):
-        print('Here 3')
-        print(temp_ExcelData)
-        try:
-            print('Here 4')
-            db.session.execute(table.insert(),temp_ExcelData.to_dict(orient='records'))
-            db.session.commit()
-            return redirect(url_for('product.index'))
-        except Exception as e:
-            db.session.rollback()
-
-    return "Submit data to dbfailed",404
-
-
-
-
-
-
-
-
-
-
-
-
+    return render_template('import_index.html',entity = entity)
 
 
 temp_ExcelData = pd.DataFrame()
@@ -446,7 +317,6 @@ def get_duplicate_rows_info(data):
     duplicate_rows = data[data.duplicated(keep=False)]
     first_duplicate_rows = duplicate_rows[~duplicate_rows.duplicated(keep='first')]
     repeated_duplicate_rows = duplicate_rows[duplicate_rows.duplicated()]
-
     return duplicate_rows, first_duplicate_rows, repeated_duplicate_rows
 
 

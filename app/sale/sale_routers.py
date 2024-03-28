@@ -7,7 +7,7 @@ from app.models.user import User
 from app.sale import bp
 from app.models.sale import Sale, Sale_Item
 from flask import render_template, request, redirect, url_for
-from app import db
+from app import db, update_qty_on_expiry
 
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, DecimalField, BooleanField, SubmitField
@@ -27,6 +27,7 @@ class PaymentForm(FlaskForm):
 @bp.route('/', methods=['GET','POST'])
 @login_required
 def sales_index():
+    update_qty_on_expiry()
     sales, product_totals,staff_totals = get_Info()
     total_sales =  db.session.query(db.func.sum(Sale.Total)).filter(Sale.Status=='paid').scalar()  
     return render_template('sales/index.html',sales = sales,products = product_totals,staff_totals = staff_totals,date = date,total_sales=total_sales)

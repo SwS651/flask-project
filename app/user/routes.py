@@ -4,7 +4,7 @@ from flask_login import current_user, login_required
 from app.user import bp
 from app.models.user import Role, User
 from flask import flash, render_template, request, redirect, url_for
-from app import db
+from app import db, update_qty_on_expiry
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, IntegerField, PasswordField, RadioField, SelectField, StringField, ValidationError
@@ -46,6 +46,7 @@ class EditStaffForm(FlaskForm):
 @login_required
 @admin_permission.require(http_exception=401)
 def index():
+    update_qty_on_expiry()
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('q', '')
     form = EditStaffForm()
@@ -170,3 +171,35 @@ def search_staff():
     keyword = request.args.get('q','')
     staffs = User.query.filter(db.or_(User.StaffID.ilike(f'%{keyword}%'), User.Last_Name.ilike(f'%{keyword}%'),User.First_Name.ilike(f'%{keyword}%'))).all()
     return render_template('admin/staff_management.html', staffs=staffs)
+
+
+
+def insert_data_to_staff(df):
+    try:
+        for index, row in df.iterrows():
+            # Create a new User object for each row of data
+            user = User(
+                StaffID=row['StaffID'],
+                First_Name=row['First_Name'],
+                Last_Name=row['Last_Name'],
+                Email=row['Email'],
+                # Add other columns as needed
+            )
+            # Set the user's password (assuming you have a method like set_password)
+            user.set_password(row['Password'])
+            user.pins = user.generate_pins()
+
+            # Add roles if specified in the DataFrame (you may need to adjust this logic)
+            roles = [role.strip() for role in row['roles'].split(',')]
+            for role_name in roles:
+                role = Role.query.filter_by(name=role_name).first()
+                if role:
+                    user.roles.append(role)
+
+            db.session.add(user)  # Add the user to the session
+
+        db.session.commit()  # Commit all changes to the database
+        return True, None  # Return success
+    except Exception as e:
+        db.session.rollback()  # Rollback changes if an error occurs
+        return False, str(e) 

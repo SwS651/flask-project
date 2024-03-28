@@ -39,9 +39,9 @@
 <br>
 {% for role in current_user.roles if role.name == 'admin' %}
 <div class="flex flex-item-center" style="margin-bottom: 30px;">
-    <a class="custom-box" href="">Product</a>
-    <a class="custom-box" href="">Inventory</a>
-    <a class="custom-box" href="">Staff</a>
+    <a class="custom-box" href="{{url_for('utils.import_overview',entity="product")}}">Product</a>
+    <a class="custom-box" href="{{url_for('utils.import_overview',entity="inventory")}}">Inventory</a>
+    <a class="custom-box" href="{{url_for('utils.import_overview',entity="users")}}">Staff</a>
 </div>
 {% endfor %}
 

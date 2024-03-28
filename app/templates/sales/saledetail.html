@@ -41,7 +41,6 @@
                 <th>Quantity</th>
                 <th>Sale Price</th>
                 <th>Sale Person</th>
-                <th>Action</th>
             </tr>
         </thead>
         <tbody>{% for sale in sales %}
@@ -74,9 +73,7 @@
                     <td>
                         {% for user in users %} {% if str(user.id) == sale.Staff_id %}{{user.Last_Name}}{% endif %} {% endfor %}{{sale.Staff_id}}
                     </td>
-                    <td>
-                        <a href=""><i class='bx bxs-trash'></i></a>
-                    </td>
+                   
                 </tr>
                 
                 {% endfor %}{% endfor %}

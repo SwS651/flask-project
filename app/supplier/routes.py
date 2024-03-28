@@ -3,13 +3,14 @@ from flask_login import login_required
 from app.supplier import bp
 from flask import render_template, request, redirect, url_for
 from app.models.supplier import Supplier
-from app import db
+from app import db, update_qty_on_expiry
 
 
 # Create Supplier
 @bp.route('/add', methods=['POST'])
 @login_required
 def add_supplier():
+    update_qty_on_expiry()
     name = request.form['name']
     contact = request.form['contact']
     address = request.form['address']

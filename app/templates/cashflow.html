@@ -30,9 +30,9 @@
             <tr>
                 <td>{{row.date}}</td>
                 <td>{{row.particulars}}</td>
-                <td>{{"%.2f"|format(row.debit)}}</td>
-                <td>{{"%.2f"|format(row.credit)}}</td>
-                <td>{{"%.2f"|format(row.balance)}}</td>
+                <td>{% if row.debit %}{{"%.2f"|format(row.debit)}}{% else %} 0 {% endif %}</td>
+                <td>{% if row.credit %}{{"%.2f"|format(row.credit)}}{% else %} 0 {% endif %}</td>
+                <td>{% if row.balance %}{{"%.2f"|format(row.balance)}}{% else %} 0 {% endif %}</td>
 
                 <td>{% if row.particulars != "balance b/f" %}<a href="{{url_for('cashflow.record_detail',id=row.id)}}">view</a> {% endif %}</td>
             </tr>

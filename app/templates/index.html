@@ -88,7 +88,7 @@
                 <i class='bx bx-line-chart-down'></i>
                 <div class="card-text">
                     <p>Products below safety level</p>
-                    <span>{{product_count['below_safety_level_products']}}</span>
+                    <span>{{count_below_safety}}</span>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                 <i class='bx bxs-hot'></i>
                 <div class="card-text">
                     <p>Lost Cost</p>
-                    <span>{{product_count['lost_cost']}}</span>
+                    <span>RM {% if product_count['lost_cost'] %}{{"%.2f"|format(product_count['lost_cost'])}}{% else %} 0 {% endif %}</span>
                 </div>
             </div>
 
@@ -127,27 +127,54 @@
 </div>
 {% if inventory_warning %}
 <div class="grid grid-column-3">
-    <div class="card">
+    <div class="card" style="justify-content: normal;">
         <div class="card-header">Prodcuts under safety line</div>
         <div class="card-contents">
             
             <table>
                 <tr>
-                <th>Product</th>
-                <th>Safety Line</th>
-                <th>Available QTY</th>
+                    <th>Product</th>
+                    <th>Safety Line</th>
+                    <th>Available QTY</th>
                 </tr>
+                {% for pro in inventory_warning %}
+                
+                
                 <tr>
-                    {% for pro in inventory_warning %}
-                    {% set available_QTY = pro.Inventories | map(attribute='Available_QTY') | sum %}
-                    <td><a href="{{url_for('product.get_product',barcode=pro.BarCode)}}">{{pro.Name}}</a></td>
+                    <td><a href="{{url_for('product.get_product',id=pro.id)}}">{{pro.Name}}</a></td>
                     <td>{{pro.Safety_quantity}}</td>
-                    <td>{{available_QTY}}</td>
-                    {%endfor%}
+                    <td>{{pro.Available_QTY}}</td>
                 </tr>
+                {%endfor%}
             </table>
 
 
+        </div>
+        
+    </div>
+    <div class="card" style="grid-column: span 2;">
+        <div class="card-header">123</div>
+        <div class="card-contents">
+
+            <table>
+                <tr>
+                    <th>No</th>
+                    <th>Product</th>
+                    <th>Quantity Loss</th>
+                    <th>Stockin Price</th>
+                    <th>Total Loss</th>
+                </tr>
+                {% for p in product_lost %}
+                <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{p.Name}}</td>
+                    <td>{{p.Lost_QTY}}</td>
+                    <td>{{p.CostPerItem}}</td>
+                    <td>{{(p.Lost_QTY * p.CostPerItem)}}</td>
+
+                </tr>
+                {% endfor %}
+            </table>
         </div>
         <div class="card-bottom"></div>
     </div>

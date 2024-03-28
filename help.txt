@@ -12,7 +12,5 @@ install requirement
 pip install -r requirement.txt
 pip instal -e .
 
-
-
 latest update:
 run.bat

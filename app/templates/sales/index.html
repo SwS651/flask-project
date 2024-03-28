@@ -90,37 +90,39 @@
             </div>
         </form>
         <br><br>
-        <table>
-            <tr> 
-                <th>No</th>
-                <th>Date</th>
-               
-                <th>Discount (%)</th>
-                <th>Payment</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-            {% for sale in sales %}
-            <tr> 
-                <td>{{sale.id}}</td>
-                <td>{{sale.Date}}</td>
-                <td>{{sale.Discount}}</td>
-                <td>{{sale.Type_Payment}}</td>
-                <td>{{"%.2f"|format(sale.Total)}}</td>
-                <td>{{sale.Status}}</td>
-                {% if sale.Status == "draft" %}
-                <td><a href="{{url_for('sale.show_checkout_page')}}">Edit</a></td>
-                {% else %}
-                <td>
-                    <a href="{{url_for('sale.get_sale_detail',date = sale.Date)}}">view</a>
-                    {% for role in current_user.roles if role.name == 'admin' %}{% endfor %}
-                
-                </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </table>
+        <div class="" style="max-height: 500px; overflow-y: scroll;">
+            <table>
+                <tr> 
+                    <th>No</th>
+                    <th>Date</th>
+                    
+                    <th>Discount (%)</th>
+                    <th>Payment</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                {% for sale in sales %}
+                <tr> 
+                    <td>{{loop.index}}</td>
+                    <td>{{sale.Date}}</td>
+                    <td>{{sale.Discount}}</td>
+                    <td>{{sale.Type_Payment}}</td>
+                    <td>{{"%.2f"|format(sale.Total)}}</td>
+                    <td>{{sale.Status}}</td>
+                    {% if sale.Status == "draft" %}
+                    <td><a href="{{url_for('sale.show_checkout_page')}}">Edit</a></td>
+                    {% else %}
+                    <td>
+                        <a href="{{url_for('sale.get_sale_detail',date = sale.Date)}}">view</a>
+                        {% for role in current_user.roles if role.name == 'admin' %}{% endfor %}
+                        
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
     
     

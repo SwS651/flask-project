@@ -6,8 +6,8 @@ from wtforms.validators import InputRequired,DataRequired,Length
 
 from app.category import bp
 from app.models.category import Category
-from flask import render_template, request, redirect, url_for
-from app import db
+from flask import flash, render_template, request, redirect, url_for
+from app import db, update_qty_on_expiry
 # from app.models.dailysalesreport import DailySalesReport, Sale
 
 class CategoryForm(FlaskForm):
@@ -19,6 +19,7 @@ class CategoryForm(FlaskForm):
 @bp.route('/', methods=['GET'])
 @login_required
 def index():
+    update_qty_on_expiry()
     form = CategoryForm()
     # categories = Category.query.all()
     page = request.args.get('page', 1, type=int)
@@ -95,4 +96,21 @@ def delete_category(id):
     db.session.commit()
 
     return redirect(url_for('category.index'))
+
+
+
+@bp.route('/product/category/create', methods=['POST'])
+@login_required
+def create_from_product():
+    product_id = request.args.get('product_id')
+    name = request.form["category_name"]
+    category = Category.query.filter(Category.Name == name).first()
+    if not category:
+        new_Category = Category(Name = category)
+        db.session.add(new_Category)
+        db.session.commit()
+    else:
+        flash('Category already exists',"category")
+
+    return redirect(url_for('product.get_product',id = product_id))
 

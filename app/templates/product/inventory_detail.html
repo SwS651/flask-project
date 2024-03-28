@@ -37,7 +37,7 @@
             <div class="card-header">
                 <div class="flex flex-between-center">
                     <h3 style="margin: 0;">Detail</h3>
-                    {% for role in current_user.roles if role.name == 'admin' %}<a href="{{url_for('product.delete_inventory',id = inventory.id)}}" style="color: red;">Delete Inventory</a>{% endfor %}
+                    {% for role in current_user.roles if role.name == 'admin' %}<a href="{{url_for('product.delete_inventory',id = inventory.id)}}" style="color: red;"  onclick="return confirm('Are you sure to delete this inventory?')">Delete Inventory</a>{% endfor %}
                 </div>
             </div>
             <div class="card-contents">
@@ -73,7 +73,7 @@
                             <td>{{re.particulars}}</td>
                             <td>{{re.qty_lost}}</td>
                             <td>{{re.remark}}</td>
-                            <td><a href="{{url_for('product.undo_items',id =re.id)}}"><i class='bx bx-undo' style="font-size:1.2rem"></i></a></td>
+                            <td><a href="{{url_for('product.undo_items',id =re.id)}}" onclick="return confirm('Do you want to perform undo?')"><i class='bx bx-undo' style="font-size:1.2rem"></i></a></td>
                         </tr>
                         {% endfor %}
                         
@@ -123,7 +123,7 @@
                 <label for="Lost_QTY">Lost QTY</label>
                 <input type="number" placeholder="" name="lost_qty" value="{{inventory.Lost_QTY}}" min="0.00" step="0.01" required>
                 
-                <input type="submit" value="Edit">
+                <input type="submit" value="Edit" onclick="return confirm('Are you sure to edit this inventory?')">
             </form>
 
             <form action="{{url_for('product.create_lost_report',i = inventory.id)}}"  id="report-form" method="post" style="display: none;">

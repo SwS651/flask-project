@@ -17,10 +17,10 @@ def create_lost_report():
     remark = request.form['remark']
     date = datetime.strftime(datetime.now(),'%Y=%m-%d %H:%M:%S')
     if not inventory:
-        return 'error: Inventory not found', 404
+        flash('error: Inventory not found', 'message')
 
     if not inventory.Available_QTY >= quantity_lost:
-        return "error: Insufficient quantity in inventory", 400
+        flash("error: Insufficient quantity in inventory","message")
     
     inventory.Available_QTY -= quantity_lost
     inventory.Lost_QTY += quantity_lost

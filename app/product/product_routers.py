@@ -1,11 +1,12 @@
 
+from datetime import date
 from flask_login import login_required
 from app.models.category import Category
 from app.models.supplier import Supplier
 from app.product import bp
 from flask import flash, render_template, request, redirect, url_for
 from app.models.product import Product
-from app import db
+from app import db, update_qty_on_expiry
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, IntegerField, SelectField, SelectMultipleField, StringField, ValidationError
@@ -30,6 +31,7 @@ class CreateProductForm(FlaskForm):
 @bp.route('/',methods=["GET"])
 @login_required
 def index():
+    update_qty_on_expiry()
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     query = request.args.get('query','')
@@ -82,7 +84,7 @@ def get_product(id):
     inventoryForm = InventoryForm()
     inventoryForm.supplier.choices = [(supplier.id,supplier.Name) for supplier in suppliers]
 
-    return render_template('product/detail.html', product=product,categories = categories,inventories = inventories,suppliers=suppliers,form = form,inventoryForm=inventoryForm)
+    return render_template('product/detail.html', product=product,categories = categories,inventories = inventories,suppliers=suppliers,form = form,inventoryForm=inventoryForm,date=date)
 
    
 
@@ -176,6 +178,7 @@ def edit_product(id):
     categories = Category.query.all()
     suppliers = Supplier.query.all()
     form = CreateProductForm(obj=product)
+    inventoryForm = InventoryForm()
     form.categories.choices = [(category.id, category.Name) for category in Category.query.all()]
 
     if request.method == 'POST':
@@ -197,7 +200,7 @@ def edit_product(id):
             db.session.rollback()
             flash("Error occurred while updating the product.", "error")
 
-    return render_template('product/detail.html', product=product,categories = categories, suppliers = suppliers ,form=form)
+    return render_template('product/detail.html', product=product,categories = categories, suppliers = suppliers ,form=form,inventoryForm=inventoryForm ,date =date)
 
 
 @bp.route('/product/<int:id>/delete')

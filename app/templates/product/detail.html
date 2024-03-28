@@ -64,49 +64,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for inventory in product.Inventories %}
+                        {% for inventory in product.Inventories if inventory.ExpiryDate>=date.today() %}
                             <tr>
                                 <form method="POST" action="" style="display: inline-block;">
-                                    <td>
-                                        <span>{{ inventory.StockInDate }}</span>
-                                        <input type="date" style="display: none;" name="StockInDate" id="StockInDate" value="{{ inventory.StockInDate }}" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ inventory.ExpiryDate }}</span>
-                                        <input type="date" style="display: none;" name="ExpiryDate" id="ExpiryDate" value="{{ inventory.ExpiryDate }}" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ inventory.Supplier_id }}</span>
-                                        <input type="text" style="display: none;" name="supplier_id" id="" value="{{ inventory.Supplier_id }}" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ inventory.Init_QTY }}</span>
-                                        <input type="number" style="display: none;" name="init_QTY" id="init_QTY" value="{{ inventory.Init_QTY }}" min="0" step="1" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ inventory.Available_QTY }}</span>
-                                        <input type="number" style="display: none;" name="available_QTY" id="available_QTY" value="{{ inventory.Available_QTY }}" min="0" step="1" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ inventory.Locked_QTY }}</span>
-                                        <input type="number" style="display: none;" name="locked_QTY" id="locked_QTY" value="{{ inventory.Locked_QTY }}" min="0" step="1" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ inventory.Lost_QTY}}</span>
-                                        <input type="number" style="display: none;" name="lost_QTY" id="lost_QTY" value="{{ inventory.Lost_QTY }}" min="0" step="1" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ inventory.Sold_QTY }}</span>
-                                        <input type="number" style="display: none;" name="sold_QTY" id="sold_QTY" value="{{ inventory.Sold_QTY }}" min="0" step="1" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ "%.2f"|format(inventory.CostPerItem) }}</span>
-                                        <input type="number" style="display: none;" name="CostPricePerItem" id="CostPricePerItem" value="{{ inventory.CostPerItem }}" min=0.00 step="0.01" required>
-                                    </td>
-                                    <td>
-                                        <span>{{ "%.2f"|format(inventory.RetailPrice) }}</span>
-                                        <input type="number" style="display: none;" name="retail_price" id="retail_price" value="{{ inventory.RetailPrice }}" min=0.00 step="0.01" required>
-                                    </td>
+                                    <td><span>{{ inventory.StockInDate }}</span></td>
+                                    <td><span>{{ inventory.ExpiryDate }}</span></td>
+                                    <td><span>{{ inventory.Supplier_id }}</span></td>
+                                    <td><span>{{ inventory.Init_QTY }}</span></td>
+                                    <td><span>{{ inventory.Available_QTY }}</span></td>
+                                    <td><span>{{ inventory.Locked_QTY }}</span></td>
+                                    <td><span>{{ inventory.Lost_QTY}}</span></td>
+                                    <td><span>{{ inventory.Sold_QTY }}</span></td>
+                                    <td><span>{{ "%.2f"|format(inventory.CostPerItem) }}</span></td>
+                                    <td><span>{{ "%.2f"|format(inventory.RetailPrice) }}</span></td>
                                     
                                 </form>
                                 <td>
@@ -117,9 +87,52 @@
                     </tbody>
                 </table>
             </div>
-            
-
+            <div class="table-container">
+                <h3>Unvailable Inventory</h3>
+                <table style="width: 100%;" class="">
+                    <thead>
+                        <tr>
+                            
+                            <th>Store-In</th>
+                            <th>Expiry-Date</th>
+                            <th>Supplier</th>
+                            <th>Init QTY</th>
+                            <th>Available QTY</th>
+                            <th>Locked QTY</th>
+                            <th>Lost QTY</th>
+                            <th>Sold QTY</th>
+                            <th>Cost Price (Per Item)</th>
+                            <th>Retail Price</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inventory in product.Inventories if inventory.ExpiryDate<=date.today() %}
+                            <tr>
+                                <form method="POST" action="" style="display: inline-block;">
+                                    <td><span>{{ inventory.StockInDate }}</span></td>
+                                    <td><span>{{ inventory.ExpiryDate }}</span></td>
+                                    <td><span>{{ inventory.Supplier_id }}</span></td>
+                                    <td><span>{{ inventory.Init_QTY }}</span></td>
+                                    <td><span>{{ inventory.Available_QTY }}</span></td>
+                                    <td><span>{{ inventory.Locked_QTY }}</span></td>
+                                    <td><span>{{ inventory.Lost_QTY}}</span></td>
+                                    <td><span>{{ inventory.Sold_QTY }}</span></td>
+                                    <td><span>{{ "%.2f"|format(inventory.CostPerItem) }}</span></td>
+                                    <td><span>{{ "%.2f"|format(inventory.RetailPrice) }}</span></td>
+                                    
+                                </form>
+                                <td>
+                                    <a href="{{url_for('product.inventory_detail',id=inventory.id)}}">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+
         {% for role in current_user.roles if role.name == 'admin' %}
         <div class="grid-item">
             
@@ -167,8 +180,19 @@
             </div>
         
             <div class="form-container">
-                
-                <form action="{{url_for('category.create_category')}}" method="post" style="margin-bottom: 10px;">
+                <div>
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <ul class="flashes">
+                        {% for message in messages %}
+                        <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% endwith %}
+                </div><br>
+                <form action="{{url_for('category.create_from_product',product_id = product.id)}}" method="post" style="margin-bottom: 10px;">
+                    
                       <input type="text" name="category_name" id="" placeholder="Food.." autocomplete="false" required>
                       <button class="button success" type="submit">Add</button>
                 </form>

@@ -1,3 +1,4 @@
+import random
 from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -47,6 +48,9 @@ class User(UserMixin,db.Model):
         self.set_password(new_password)
         db.session.commit()
         return True, "Password updated successfully."
+    
+    def generate_pins(self):
+        return random.randint(100000, 999999)
 
 # create table in database for assigning roles
 class UserRoles(db.Model):

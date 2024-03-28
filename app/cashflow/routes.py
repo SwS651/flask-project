@@ -2,12 +2,13 @@ from datetime import date, datetime, time, timedelta
 import string
 from flask import Flask, Blueprint, redirect, render_template, request, url_for
 from numpy import equal
+from app import update_qty_on_expiry
 from app.extensions import db
 from app.models.cashflow import Cashflow
 bp = Blueprint('cashflow',__name__)
 
 def init_current_month():
-
+    update_qty_on_expiry()
     first_day_of_month, last_day_of_month, firstday_of_previous_month, last_month_end = get_month_value(date.today())
 
     # Filter last record of previous month

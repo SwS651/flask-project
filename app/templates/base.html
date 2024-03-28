@@ -12,7 +12,18 @@
     <link rel="stylesheet" href="{{url_for('static',filename='css/preloader.css')}}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    {% block css_style %}{% endblock %}
+    {% block css_style %}
+    {% endblock %}
+    <style>
+        .logout{
+            padding: .5rem 1rem
+        }
+        .logout:hover{
+            background: rgba(212, 212, 212, 0.3);
+            border-radius: 10px;
+            
+        }
+    </style>
 
 </head>
 <body>
@@ -48,8 +59,10 @@
                             <li class="menu-link {% block nav_profile %}{% endblock %}"><i class='nav-icon bx bx-user-circle'></i><a href="{{url_for('user.get_staff',id=current_user.id)}}">Profile</a></li>
                         </ul>
                     </div>
-                    <div class="bottom-content">
-                        <li class="menu-link"><i class='nav-icon bx bx-user-logout'></i><a href="{{url_for('auth.logout')}}">Logout</a></li>
+                    <div class="bottom-content logout">
+                        <div class="flex" style="color: #fff !important;">
+                            <i class='bx bx-log-out'></i><a style="color: #fff !important;" href="{{url_for('auth.logout')}}" onclick="return confirm('Log out immediately?')">Logout</a>
+                        </div>
                     </div>
                 </div>
                 

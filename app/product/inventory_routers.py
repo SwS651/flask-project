@@ -125,3 +125,54 @@ def edit_inventory(id):
     db.session.commit()
 
     return redirect(url_for("product.get_product",id = inventory.Product_id))
+
+
+
+def insert_data_to_invenory(df):
+    try:
+        for index, row in df.iterrows():
+            # Get or create Product based on name
+            product_name = row['Product']
+            product = Product.query.filter_by(Name=product_name).first()
+            if product is None:
+                # Create a new Product if not found
+                product = Product(BarCode = row['BarCode'],Name=product_name,Safety_quantity = -1,Status="InStock")
+                db.session.add(product)
+                db.session.commit()
+            
+            # Get or create Supplier based on name
+            supplier_name = row['Supplier']
+            supplier = Supplier.query.filter_by(Name=supplier_name).first()
+            if supplier is None:
+                # Create a new Supplier if not found
+                supplier = Supplier(Name=supplier_name)
+                db.session.add(supplier)
+                db.session.commit()
+            
+
+            stockInDate=datetime.strftime(row['StockInDate'], '%Y-%m-%d')
+            expiryDate=datetime.strftime(row['ExpiryDate'], '%Y-%m-%d')
+            stockInDate=datetime.strptime(stockInDate, '%Y-%m-%d').date()
+            expiryDate=datetime.strptime(expiryDate, '%Y-%m-%d').date()
+            print(stockInDate)
+            # Create Inventory item
+            inventory = Inventory(
+                Product_id=product.id,
+                Supplier_id = supplier.id,
+                StockInDate=date(stockInDate.year,stockInDate.month,stockInDate.day),
+                ExpiryDate=date(expiryDate.year,expiryDate.month,expiryDate.day),
+                Init_QTY=row['Init_QTY'],
+                Available_QTY=row['Available_QTY'],
+                Locked_QTY=row['Locked_QTY'],
+                Lost_QTY=row['Lost_QTY'],
+                Sold_QTY=row['Sold_QTY'],
+                CostPerItem=row['CostPerItem'],
+                RetailPrice=row['RetailPrice']
+            )
+            db.session.add(inventory)
+            db.session.commit()
+        
+        return True, None  # Success
+    except Exception as e:
+        db.session.rollback()
+        return False, str(e) 

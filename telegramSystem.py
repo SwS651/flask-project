@@ -1,8 +1,10 @@
+import html
+import os
 from typing import Final
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from datetime import datetime
- 
+from app.extensions import db
  
 user_state = ""
  
@@ -33,23 +35,22 @@ async def info_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
  
 # /announce
 async def announce_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "S-Mart will be close from 4 March 2024 - 18 March 2024"
-    )
+    # content = read_announcement_md('announcement.md')
+    
+    content = str(read_md('announcement.md'))
+    await update.message.reply_text(text = content)
  
  
 # /pricetdy
 async def pricetdy_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "1"
-    )
+    content = str(read_md('price_today.md'))
+    await update.message.reply_text(text = content)
  
  
 # /promo
 async def promo_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "2"
-    )
+    content = str(read_md('promo.md'))
+    await update.message.reply_text(text = content)
  
  
 # /FAQ
@@ -67,6 +68,19 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❓Q5: Can I reserve a product through the bot?\n"
         "\t 🔍A: Currently, product reservation is not available through our Telegram bot.\n\n"
     )
+
+import markdown
+from bs4 import BeautifulSoup
+def read_md(filename):
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    file_path = os.path.join(basedir,filename)
+    with open(file_path, 'r', encoding='utf-8') as f:
+        md_content = f.read()
+        html_content = markdown.markdown(md_content)
+        content = BeautifulSoup(html_content, 'html.parser')
+        return content.get_text()
+
+
 # def handle_response(user:str, text: str) -> str:
 #     global user_state
 #     processed: str = text.lower()
